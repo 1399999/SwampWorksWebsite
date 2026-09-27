@@ -1,5 +1,6 @@
 # python3 -m "venv" "envsource" "env/bin/activate"
-pip "install" -r "requirements.txt"
+python -m "pip" "install" -r "requirements.txt"
+
 
 # Make database migrations
 python manage.py makemigrations
@@ -9,11 +10,11 @@ python manage.py migrate
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Renames project
-Write-Host "Enter a new project name: (ensure name is allowed by Django before pressing enter)"
-$project_name = Read-Host
+# Write-Host "Enter a new project name: (ensure name is allowed by Django before pressing enter)"
+# $project_name = Read-Host
 
-python manage.py rename djangotemplate $project_name
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# python manage.py rename djangotemplate $project_name
+# if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Run server
 # python manage.py runserver
