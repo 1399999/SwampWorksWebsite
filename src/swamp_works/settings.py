@@ -30,6 +30,7 @@ NPM_BIN_PATH = which('npm')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-25(@rn#gehs9i^-a9(v2m2$%bio6&r%%mx@2&=9m9r-wixk)6$')
+ADMIN_PASSKEY = os.environ.get('ADMIN_PASSKEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() != 'false'
@@ -172,3 +173,6 @@ if not DEBUG:
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
         },
     }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

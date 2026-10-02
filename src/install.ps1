@@ -4,6 +4,7 @@ python -m "pip" "install" -r "requirements.txt"
 
 # Make database migrations
 python manage.py makemigrations
+python "manage.py" "makemigrations" "landing_page"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 python manage.py migrate
@@ -27,5 +28,6 @@ Write-Host "Project setup complete."
 
 npm install --save-dev cross-env
 python "manage.py" "tailwind" "install"
+
 # python "manage.py" "tailwind" "start"
 # python "manage.py" "runserver"

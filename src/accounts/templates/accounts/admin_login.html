@@ -1,0 +1,25 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Admin Login{% endblock title %}
+
+{% block form %}
+    <form action="{% url 'accounts:admin_login' %}" method="post">
+        {% csrf_token %}
+
+        <h1>Admin Login</h1>
+
+        {% if message %}
+            <p class="error">{{ message }}</p>
+        {% endif %}
+
+        <div class="form-group">
+            <p class="field-label">
+                Passkey
+            </p>
+            <input type="password" name="passkey" id="passkey">
+        </div>
+
+        <input type="submit" value="Log In as Admin">
+    </form>
+{% endblock %}

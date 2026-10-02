@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
@@ -67,8 +69,6 @@ def register_view(request):
                 })
 
             #fall back to showing Django's actual validation errors
-            #(most commonly password validators: too short, too common,
-            #too similar to username, or entirely numeric)
             error_messages = []
             for field, errors in form.errors.items():
                 for error in errors:
@@ -82,3 +82,22 @@ def register_view(request):
     elif request.method == 'GET':
         form = CustomUserCreationForm()
         return render(request, 'accounts/register.html', {'form': form})
+
+@login_required
+def admin_login_view(request):
+
+    #only logged in users can attempt this, and only non-admins need to see the form
+    if request.session.get('is_admin'):
+        return redirect('dashboard:admin')
+
+    if request.method == 'POST':
+        passkey = request.POST.get('passkey', '')
+        if passkey and passkey == settings.ADMIN_PASSKEY:
+            request.session['is_admin'] = True
+            return redirect('dashboard:admin')
+        else:
+            return render(request, 'accounts/admin_login.html', {
+                'message': 'Incorrect passkey'
+            })
+    elif request.method == 'GET':
+        return render(request, 'accounts/admin_login.html')

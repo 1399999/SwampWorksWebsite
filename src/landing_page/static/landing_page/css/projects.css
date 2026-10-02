@@ -1,0 +1,90 @@
+.projects-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+    font-family: var(--primary-font, 'Inter', sans-serif);
+}
+ 
+.projects-page h1 {
+    font-weight: 600;
+    font-size: 32px;
+    color: var(--heading-color, #092e20);
+    margin-bottom: 20px;
+}
+ 
+.projects-page h2 {
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--heading-color, #092e20);
+    margin-bottom: 12px;
+}
+ 
+.project-form-card {
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+ 
+.form-row {
+    margin-bottom: 14px;
+}
+ 
+.form-row label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+ 
+.form-row textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    font-family: inherit;
+}
+ 
+.project-form-card button {
+    background: #092e20;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+ 
+.form-error {
+    color: #c0392b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+ 
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+ 
+.project-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+ 
+.project-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+ 
+.project-card p {
+    padding: 14px;
+    line-height: 1.5;
+}
+ 
+.no-projects {
+    color: #666;
+}
