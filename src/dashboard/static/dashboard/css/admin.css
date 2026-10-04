@@ -1,0 +1,105 @@
+.admin-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+    font-family: var(--primary-font, 'Inter', sans-serif);
+}
+
+.admin-page h1 {
+    font-weight: 600;
+    font-size: 32px;
+    color: var(--heading-color, #19a26d);
+    margin-bottom: 24px;
+}
+
+.admin-section {
+    margin-bottom: 36px;
+}
+
+.admin-page h2 {
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--heading-color, #19a26d);
+    margin-bottom: 12px;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table th, .user-table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.user-table th {
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.delete-button {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background: #a5311f;
+}
+
+.current-user-label {
+    color: #888;
+    font-size: 13px;
+}
+
+.add-user-form {
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 420px;
+}
+
+.form-row {
+    margin-bottom: 14px;
+}
+
+.form-row label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.form-row input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.add-user-form button {
+    background: #19a26d;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-error {
+    color: #c0392b;
+    font-size: 14px;
+    margin-top: 4px;
+}

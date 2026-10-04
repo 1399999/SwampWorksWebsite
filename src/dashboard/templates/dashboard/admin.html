@@ -2,9 +2,68 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'dashboard/css/admin.css' %}">
 
-<h1>Admin Area</h1>
+<main class="admin-page">
+    <h1>Admin Area</h1>
 
-<p>You're logged in as an admin. This page doesn't do anything yet.</p>
+    <section class="admin-section">
+        <h2>Users</h2>
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Staff</th>
+                    <th>Date Joined</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in users %}
+                    <tr>
+                        <td>{{ account.username }}</td>
+                        <td>{{ account.email }}</td>
+                        <td>{{ account.is_staff|yesno:"Yes,No" }}</td>
+                        <td>{{ account.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if account.pk != user.pk %}
+                                <form action="{% url 'dashboard:admin_delete_user' account.pk %}" method="post" class="delete-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-button">Delete</button>
+                                </form>
+                            {% else %}
+                                <span class="current-user-label">(you)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">No users found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
 
+    <section class="admin-section">
+        <h2>Add a user</h2>
+        <form method="post" class="add-user-form">
+            {% csrf_token %}
+            {% if form.errors %}
+                <p class="form-error">Please fix the errors below.</p>
+            {% endif %}
+            {% for field in form %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit">Add User</button>
+        </form>
+    </section>
+</main>
 {% endblock content %}
