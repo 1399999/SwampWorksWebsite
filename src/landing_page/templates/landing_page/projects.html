@@ -2,10 +2,10 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'landing_page/css/projects.css' %}">
- 
+
 <main class="projects-page">
     <h1>Projects</h1>
- 
+
     {% if user.is_authenticated %}
         <section class="project-form-card">
             <h2>Add a project</h2>
@@ -27,13 +27,28 @@
             </form>
         </section>
     {% endif %}
- 
+
     {% if projects %}
         <div class="project-grid">
             {% for project in projects %}
                 <article class="project-card">
                     <img src="{{ project.image.url }}" alt="Project image">
-                    <p>{{ project.description|linebreaksbr }}</p>
+                    <div class="project-card-body">
+                        <span class="status-badge status-{{ project.status }}">{{ project.get_status_display }}</span>
+                        <p>{{ project.description|linebreaksbr }}</p>
+
+                        {% if user.is_authenticated and request.session.is_admin %}
+                            <form action="{% url 'landing_page:update_project_status' project.pk %}" method="post" class="status-form">
+                                {% csrf_token %}
+                                <select name="status">
+                                    {% for value, label in project.STATUS_CHOICES %}
+                                        <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit">Update</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </article>
             {% endfor %}
         </div>

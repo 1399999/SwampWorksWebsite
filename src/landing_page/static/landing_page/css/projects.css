@@ -88,3 +88,49 @@
 .no-projects {
     color: #666;
 }
+
+.status-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.status-ongoing {
+    background: #fff4d6;
+    color: #8a6400;
+}
+
+.status-completed {
+    background: #d9f2e3;
+    color: #1a7a4c;
+}
+
+.status-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.status-form select {
+    padding: 4px 8px;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.status-form button {
+    background: #092e20;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
