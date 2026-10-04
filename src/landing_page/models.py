@@ -28,3 +28,17 @@ class Idea(models.Model):
 
     def __str__(self):
         return self.description[:50]
+
+
+class ClubMeeting(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    date = models.DateField()
+    time = models.TimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date', 'time']
+
+    def __str__(self):
+        return f"{self.title} ({self.date})"

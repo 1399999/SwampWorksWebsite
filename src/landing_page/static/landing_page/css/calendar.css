@@ -1,0 +1,171 @@
+.calendar-page {
+    max-width: 900px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+    font-family: var(--primary-font, 'Inter', sans-serif);
+}
+
+.calendar-page h2 {
+    font-weight: 600;
+    font-size: 24px;
+    color: var(--heading-color, #092e20);
+    margin: 28px 0 12px;
+}
+
+.calendar-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.calendar-title {
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--heading-color, #092e20);
+}
+
+.calendar-nav {
+    text-decoration: none;
+    color: #092e20;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.calendar-nav:hover {
+    text-decoration: underline;
+}
+
+.calendar-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.calendar-grid th {
+    font-size: 12px;
+    color: #888;
+    font-weight: 600;
+    padding: 6px 0;
+    text-transform: uppercase;
+}
+
+.calendar-grid td {
+    vertical-align: top;
+    height: 80px;
+    border: 1px solid #f0f0f0;
+    padding: 6px;
+    font-size: 13px;
+}
+
+.calendar-grid td.empty-day {
+    background: #fafafa;
+}
+
+.calendar-grid td.today {
+    background: #eaf6ef;
+    border: 1px solid #19a26d;
+}
+
+.day-number {
+    font-weight: 600;
+    color: #555;
+}
+
+.meeting-pill {
+    margin-top: 4px;
+    background: #092e20;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meeting-delete-form {
+    display: inline;
+    margin: 0;
+}
+
+.meeting-delete-form button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0;
+}
+
+.upcoming-list ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.upcoming-list li {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 10px 14px;
+}
+
+.meeting-desc {
+    color: #666;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.meeting-form-card {
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.form-row {
+    margin-bottom: 14px;
+}
+
+.form-row label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.form-row input, .form-row textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.meeting-form-card button[type="submit"] {
+    background: #092e20;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-error {
+    color: #c0392b;
+    font-size: 14px;
+    margin-top: 4px;
+}

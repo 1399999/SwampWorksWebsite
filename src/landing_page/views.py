@@ -1,11 +1,93 @@
+import calendar
+from datetime import date
+
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import ProjectForm, IdeaForm
-from .models import Project, Idea
+from .forms import ProjectForm, IdeaForm, MeetingForm
+from .models import Project, Idea, ClubMeeting
 
-# Initial landing page view.
+
+def _is_admin(request):
+    return request.user.is_authenticated and request.session.get('is_admin')
+
+
 def index(request):
-    return render(request, 'landing_page/index.html')
+
+    if request.method == 'POST':
+        # only a logged-in admin can add a meeting
+        if not _is_admin(request):
+            return redirect('landing_page:index')
+
+        form = MeetingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('landing_page:index')
+    else:
+        form = MeetingForm()
+
+    today = date.today()
+    try:
+        year = int(request.GET.get('year', today.year))
+        month = int(request.GET.get('month', today.month))
+    except ValueError:
+        year, month = today.year, today.month
+
+    # keep the month in a valid range, rolling the year over as needed
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+
+    cal = calendar.Calendar(firstweekday=6)
+    month_days = cal.monthdayscalendar(year, month)
+
+    meetings_this_month = ClubMeeting.objects.filter(date__year=year, date__month=month)
+    meetings_by_day = {}
+    for meeting in meetings_this_month:
+        meetings_by_day.setdefault(meeting.date.day, []).append(meeting)
+
+    weeks = []
+    for week in month_days:
+        week_data = []
+        for day in week:
+            week_data.append({
+                'day': day,
+                'is_today': day != 0 and date(year, month, day) == today,
+                'meetings': meetings_by_day.get(day, []) if day != 0 else [],
+            })
+        weeks.append(week_data)
+
+    prev_month, prev_year = (month - 1, year) if month > 1 else (12, year - 1)
+    next_month, next_year = (month + 1, year) if month < 12 else (1, year + 1)
+
+    return render(request, 'landing_page/index.html', {
+        'weeks': weeks,
+        'weekday_labels': ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        'month_name': calendar.month_name[month],
+        'year': year,
+        'month': month,
+        'prev_month': prev_month,
+        'prev_year': prev_year,
+        'next_month': next_month,
+        'next_year': next_year,
+        'upcoming_meetings': ClubMeeting.objects.filter(date__gte=today),
+        'form': form,
+        'is_admin': _is_admin(request),
+    })
+
+
+def delete_meeting(request, meeting_id):
+    if not _is_admin(request):
+        return redirect('landing_page:index')
+
+    if request.method == 'POST':
+        meeting = get_object_or_404(ClubMeeting, pk=meeting_id)
+        meeting.delete()
+
+    return redirect('landing_page:index')
+
 
 def about(request):
     return render(request, 'landing_page/about.html')
@@ -29,8 +111,7 @@ def projects(request):
     })
 
 def update_project_status(request, project_id):
-    # only admins can change a project's status; everyone else can just view it
-    if not (request.user.is_authenticated and request.session.get('is_admin')):
+    if not _is_admin(request):
         return redirect('landing_page:projects')
 
     if request.method == 'POST':
@@ -43,7 +124,6 @@ def update_project_status(request, project_id):
     return redirect('landing_page:projects')
 
 def ideas(request):
-    # anyone, logged in or not, can post an idea
     if request.method == 'POST':
         form = IdeaForm(request.POST)
         if form.is_valid():
