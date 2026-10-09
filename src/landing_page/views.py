@@ -1,7 +1,10 @@
 import calendar
 from datetime import date
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 from .forms import ProjectForm, IdeaForm, MeetingForm
 from .models import Project, Idea, ClubMeeting
@@ -9,6 +12,24 @@ from .models import Project, Idea, ClubMeeting
 
 def _is_admin(request):
     return request.user.is_authenticated and request.session.get('is_admin')
+
+
+def _notify_admin_of_new_project(request, project):
+    if not settings.ADMIN_EMAIL:
+        return
+
+    review_url = request.build_absolute_uri(reverse('dashboard:admin'))
+    send_mail(
+        subject='New project submitted for approval',
+        message=(
+            f"A new project was submitted and is waiting for approval.\n\n"
+            f"Description: {project.description}\n\n"
+            f"Review and approve it here: {review_url}"
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.ADMIN_EMAIL],
+        fail_silently=True,
+    )
 
 
 def index(request):
@@ -32,7 +53,6 @@ def index(request):
     except ValueError:
         year, month = today.year, today.month
 
-    # keep the month in a valid range, rolling the year over as needed
     if month < 1:
         month = 12
         year -= 1
@@ -92,23 +112,29 @@ def delete_meeting(request, meeting_id):
 def about(request):
     return render(request, 'landing_page/about.html')
 
-def projects(request):
-    if request.method == 'POST':
-        # only logged in users can add projects
-        if not request.user.is_authenticated:
-            return redirect('accounts:login')
 
+def projects(request):
+    submitted = False
+
+    if request.method == 'POST':
+        # anyone - logged in or not - can submit a project, but it starts unapproved
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('landing_page:projects')
+            project = form.save(commit=False)
+            project.is_approved = False
+            project.save()
+            _notify_admin_of_new_project(request, project)
+            return redirect(reverse('landing_page:projects') + '?submitted=1')
     else:
         form = ProjectForm()
+        submitted = request.GET.get('submitted') == '1'
 
     return render(request, 'landing_page/projects.html', {
-        'projects': Project.objects.all(),
+        'projects': Project.objects.filter(is_approved=True),
         'form': form,
+        'submitted': submitted,
     })
+
 
 def update_project_status(request, project_id):
     if not _is_admin(request):
@@ -122,6 +148,30 @@ def update_project_status(request, project_id):
             project.save()
 
     return redirect('landing_page:projects')
+
+
+def approve_project(request, project_id):
+    if not _is_admin(request):
+        return redirect('dashboard:admin')
+
+    if request.method == 'POST':
+        project = get_object_or_404(Project, pk=project_id)
+        project.is_approved = True
+        project.save()
+
+    return redirect('dashboard:admin')
+
+
+def reject_project(request, project_id):
+    if not _is_admin(request):
+        return redirect('dashboard:admin')
+
+    if request.method == 'POST':
+        project = get_object_or_404(Project, pk=project_id)
+        project.delete()
+
+    return redirect('dashboard:admin')
+
 
 def ideas(request):
     if request.method == 'POST':

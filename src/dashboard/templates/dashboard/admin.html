@@ -7,6 +7,30 @@
 <main class="admin-page">
     <h1>Admin Area</h1>
 
+    {% if pending_projects %}
+        <section class="admin-section">
+            <h2>Pending Projects ({{ pending_projects|length }})</h2>
+            <div class="pending-grid">
+                {% for project in pending_projects %}
+                    <article class="pending-card">
+                        <img src="{{ project.image.url }}" alt="Project image">
+                        <p>{{ project.description|linebreaksbr }}</p>
+                        <div class="pending-actions">
+                            <form action="{% url 'landing_page:approve_project' project.pk %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="approve-button">Approve</button>
+                            </form>
+                            <form action="{% url 'landing_page:reject_project' project.pk %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="reject-button">Reject</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
     <section class="admin-section">
         <h2>Users</h2>
         <table class="user-table">

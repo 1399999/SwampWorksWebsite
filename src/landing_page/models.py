@@ -10,6 +10,7 @@ class Project(models.Model):
     image = models.ImageField(upload_to='projects/')
     description = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ongoing')
+    is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

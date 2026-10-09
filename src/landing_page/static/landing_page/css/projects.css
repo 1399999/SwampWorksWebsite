@@ -134,3 +134,18 @@
     font-size: 13px;
     cursor: pointer;
 }
+
+.pending-note {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 14px;
+}
+
+.form-success {
+    background: #d9f2e3;
+    color: #1a7a4c;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
