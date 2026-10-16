@@ -2,7 +2,7 @@
     max-width: 1100px;
     margin: 0 auto;
     padding: 24px;
-    font-family: var(--primary-font, 'Inter', sans-serif);
+    font-family: var(--primary-font, Arial, Helvetica, sans-serif);
 }
 
 .projects-page h1 {
