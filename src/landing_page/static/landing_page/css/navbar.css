@@ -1,6 +1,7 @@
 .site-navbar {
     width: 100%;
-    background-color: #092e20;
+    background-color: #2563eb;
+    background-image: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
     font-family: var(--primary-font, 'Inter', sans-serif);
 }
 
@@ -61,7 +62,7 @@
 
 .navbar-signup {
     background-color: #ffffff;
-    color: #092e20;
+    color: #1e40af;
     text-decoration: none;
     font-size: 15px;
     font-weight: 600;

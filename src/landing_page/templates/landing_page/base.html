@@ -10,11 +10,13 @@
     <link rel="stylesheet" href="{% static 'landing_page/css/reset.css' %}">
     <link rel="stylesheet" href="{% static 'landing_page/css/navbar.css' %}">
     <link rel="stylesheet" href="{% static 'landing_page/css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'landing_page/css/footer.css' %}">
     <title>django template</title>
 </head>
 <body>
     {% include 'partials/navbar.html' %}
     {% block content %}
     {% endblock content %}
+    {% include 'partials/footer.html' %}
 </body>
 </html>
