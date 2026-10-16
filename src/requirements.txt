@@ -13,7 +13,6 @@ cssbeautifier==1.15.1
 Django>=5.0.14
 django-browser-reload==1.12.1
 django-storages==1.14.4
-django-tailwind==3.8.0
 djlint==1.36.3
 EditorConfig==0.12.4
 idna==3.7

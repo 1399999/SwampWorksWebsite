@@ -6,8 +6,8 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-from .forms import ProjectForm, IdeaForm, MeetingForm
-from .models import Project, Idea, ClubMeeting
+from .forms import ProjectForm, IdeaForm, MeetingForm, ContactForm
+from .models import Project, Idea, ClubMeeting, Contact
 
 
 def _is_admin(request):
@@ -229,6 +229,33 @@ def ideas(request):
     })
 
 def contact(request):
-    return render(request, 'landing_page/contact.html')
+    if request.method == 'POST':
+        # only a logged-in admin can add a contact
+        if not _is_admin(request):
+            return redirect('landing_page:contact')
+
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('landing_page:contact')
+    else:
+        form = ContactForm()
+
+    return render(request, 'landing_page/contact.html', {
+        'contacts': Contact.objects.all(),
+        'form': form,
+        'is_admin': _is_admin(request),
+    })
+
+
+def delete_contact(request, contact_id):
+    if not _is_admin(request):
+        return redirect('landing_page:contact')
+
+    if request.method == 'POST':
+        person = get_object_or_404(Contact, pk=contact_id)
+        person.delete()
+
+    return redirect('landing_page:contact')
 
 #Add other views here

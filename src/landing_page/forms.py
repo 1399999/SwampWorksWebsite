@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Idea, ClubMeeting
+from .models import Project, Idea, ClubMeeting, Contact
 
 
 class ProjectForm(forms.ModelForm):
@@ -28,4 +28,15 @@ class MeetingForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional details...'}),
             'date': forms.DateInput(attrs={'type': 'date'}),
             'time': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = ['name', 'role', 'email']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full name'}),
+            'role': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Secretary'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'name@example.com'}),
         }
