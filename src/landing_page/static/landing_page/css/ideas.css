@@ -77,3 +77,21 @@
 .no-ideas {
     color: #666;
 }
+
+.remove-form {
+    margin-top: 10px;
+}
+
+.remove-form button {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.remove-form button:hover {
+    background: #a5311f;
+}

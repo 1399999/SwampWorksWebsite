@@ -51,6 +51,10 @@
                                 </select>
                                 <button type="submit">Update</button>
                             </form>
+                            <form action="{% url 'landing_page:delete_project' project.pk %}" method="post" class="remove-form" onsubmit="return confirm('Delete this project?');">
+                                {% csrf_token %}
+                                <button type="submit">Delete project</button>
+                            </form>
                         {% endif %}
                     </div>
                 </article>

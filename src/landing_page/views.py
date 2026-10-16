@@ -28,7 +28,25 @@ def _notify_admin_of_new_project(request, project):
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[settings.ADMIN_EMAIL],
-        fail_silently=False,
+        fail_silently=True,
+    )
+
+
+def _notify_admin_of_new_idea(request, idea):
+    if not settings.ADMIN_EMAIL:
+        return
+
+    ideas_url = request.build_absolute_uri(reverse('landing_page:ideas'))
+    send_mail(
+        subject='New project IDEA posted',
+        message=(
+            f"A new project idea was posted on the Project Ideas page.\n\n"
+            f"Idea: {idea.description}\n\n"
+            f"View all ideas here: {ideas_url}"
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.ADMIN_EMAIL],
+        fail_silently=True,
     )
 
 
@@ -173,11 +191,34 @@ def reject_project(request, project_id):
     return redirect('dashboard:admin')
 
 
+def delete_project(request, project_id):
+    if not _is_admin(request):
+        return redirect('landing_page:projects')
+
+    if request.method == 'POST':
+        project = get_object_or_404(Project, pk=project_id)
+        project.delete()
+
+    return redirect('landing_page:projects')
+
+
+def delete_idea(request, idea_id):
+    if not _is_admin(request):
+        return redirect('landing_page:ideas')
+
+    if request.method == 'POST':
+        idea = get_object_or_404(Idea, pk=idea_id)
+        idea.delete()
+
+    return redirect('landing_page:ideas')
+
+
 def ideas(request):
     if request.method == 'POST':
         form = IdeaForm(request.POST)
         if form.is_valid():
-            form.save()
+            idea = form.save()
+            _notify_admin_of_new_idea(request, idea)
             return redirect('landing_page:ideas')
     else:
         form = IdeaForm()
