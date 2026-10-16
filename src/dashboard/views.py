@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from accounts.models import User
 from accounts.forms import CustomUserCreationForm
 
+from landing_page.models import Project
+
 # Create your views here.
 def index(request):
 
@@ -31,6 +33,7 @@ def admin_index(request):
     return render(request, 'dashboard/admin.html', {
         'users': User.objects.all().order_by('username'),
         'form': form,
+        'pending_projects': Project.objects.filter(is_approved=False)
     })
 
 @login_required
