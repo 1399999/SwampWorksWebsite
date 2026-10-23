@@ -8,7 +8,7 @@
 .calendar-page h2 {
     font-weight: 600;
     font-size: 24px;
-    color: var(--heading-color, #1e40af);
+    color: var(--heading-color, #0b1f4b);
     margin: 28px 0 12px;
 }
 
@@ -28,12 +28,12 @@
 .calendar-title {
     font-weight: 600;
     font-size: 18px;
-    color: var(--heading-color, #1e40af);
+    color: var(--heading-color, #0b1f4b);
 }
 
 .calendar-nav {
     text-decoration: none;
-    color: #1e40af;
+    color: #0b1f4b;
     font-weight: 500;
     font-size: 14px;
 }
@@ -49,6 +49,7 @@
 }
 
 .calendar-grid th {
+    color: #0b1f4b;
     font-size: 12px;
     color: #888;
     font-weight: 600;
@@ -69,8 +70,8 @@
 }
 
 .calendar-grid td.today {
-    background: #eff6ff;
-    border: 1px solid #2563eb;
+    background: #f3fbdc;
+    border: 1px solid #84cc16;
 }
 
 .day-number {
@@ -80,7 +81,7 @@
 
 .meeting-pill {
     margin-top: 4px;
-    background: #1e40af;
+    background: #0b1f4b;
     color: #fff;
     font-size: 11px;
     padding: 2px 6px;
@@ -119,6 +120,7 @@
 
 .upcoming-list li {
     border: 1px solid #e0e0e0;
+    border-left: 4px solid #84cc16;
     border-radius: 6px;
     padding: 10px 14px;
 }
@@ -130,7 +132,8 @@
 }
 
 .meeting-form-card {
-    background: #f4f4f4;
+    background: #fff;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 32px;
@@ -155,8 +158,9 @@
 }
 
 .meeting-form-card button[type="submit"] {
-    background: #1e40af;
-    color: #fff;
+    background: #84cc16;
+    color: #0b1f4b;
+    font-weight: 700;
     border: none;
     padding: 10px 18px;
     border-radius: 4px;
@@ -168,4 +172,8 @@
     color: #c0392b;
     font-size: 14px;
     margin-top: 4px;
+}
+
+.meeting-form-card button[type="submit"]:hover {
+    background: #65a30d;
 }

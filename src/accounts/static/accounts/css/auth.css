@@ -1,8 +1,88 @@
 :root{
     --primary-font: Arial, Helvetica, sans-serif;
+    --heading-color: #0b1f4b;
 }
 
 body{
-    background-color: rgb(224, 224, 224);
+    background-color: #fff;
     font-family: var(--primary-font);
+}
+
+form{
+    max-width: 420px;
+    margin: 48px auto 0;
+    padding: 28px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-top: 4px solid #84cc16;
+    border-radius: 8px;
+}
+
+h1{
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--heading-color);
+    margin-bottom: 18px;
+}
+
+.form-group{
+    margin-bottom: 14px;
+}
+
+.field-label{
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.form-group input{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input:focus{
+    outline: 2px solid #84cc16;
+    border-color: #84cc16;
+}
+
+input[type="submit"]{
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px;
+    background: #84cc16;
+    color: #0b1f4b;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover{
+    background: #65a30d;
+}
+
+.error{
+    background: #fdecea;
+    color: #c0392b;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.dont-have{
+    margin-top: 16px;
+    font-size: 14px;
+    color: #555;
+}
+
+.dont-have a{
+    color: #0b1f4b;
+    font-weight: 600;
 }

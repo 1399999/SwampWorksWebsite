@@ -1,7 +1,7 @@
 .site-navbar {
     width: 100%;
-    background-color: #2563eb;
-    background-image: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+    background-color: #0b1f4b;
+    border-bottom: 4px solid #84cc16;
     font-family: var(--primary-font, Arial, Helvetica, sans-serif);
 }
 
@@ -39,7 +39,7 @@
 }
 
 .navbar-links li a:hover {
-    color: #ffffff;
+    color: #84cc16;
     text-decoration: underline;
 }
 
@@ -57,12 +57,13 @@
 }
 
 .navbar-login:hover {
+    color: #84cc16;
     text-decoration: underline;
 }
 
 .navbar-signup {
-    background-color: #ffffff;
-    color: #1e40af;
+    background-color: #84cc16;
+    color: #0b1f4b;
     text-decoration: none;
     font-size: 15px;
     font-weight: 600;
@@ -71,5 +72,5 @@
 }
 
 .navbar-signup:hover {
-    background-color: #e5e5e5;
+    background-color: #65a30d;
 }

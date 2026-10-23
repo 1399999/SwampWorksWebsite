@@ -6,16 +6,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{% static 'landing_page/images/favicon.png' %}" type="image/x-icon">
-    <link rel="stylesheet" href="{% static 'landing_page/css/reset.css' %}">
-    <link rel="stylesheet" href="{% static 'landing_page/css/navbar.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/auth.css' %}">
-    <link rel="stylesheet" href="{% static 'landing_page/css/footer.css' %}">
-    <title>django auth - {% block title%} {% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'landing_page/css/theme.css' %}">
+    <title>{% block title%}{% endblock %} | SwampWorks</title>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     {% include 'partials/navbar.html' %}
-    {% block form %}
-    {% endblock form %}
+    <div class="flex-grow-1">
+        <main class="bg-light border-bottom py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 col-lg-5">
+                        <div class="card border-0 border-top border-primary border-5 shadow">
+                            <div class="card-body p-4 p-md-5">
+                                {% block form %}
+                                {% endblock form %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
     {% include 'partials/footer.html' %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

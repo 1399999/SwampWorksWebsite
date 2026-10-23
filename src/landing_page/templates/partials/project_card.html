@@ -1,0 +1,47 @@
+<article class="card h-100 rounded-4 overflow-hidden shadow-sm">
+    {% include 'partials/project_carousel.html' %}
+
+    <div class="card-body p-4">
+        <h3 class="h4 mb-2">{{ project.title }}</h3>
+        <p class="card-text mb-3">{{ project.description|linebreaksbr }}</p>
+
+        {% if project.technology_list %}
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% for tech in project.technology_list %}
+                    <span class="badge rounded-pill text-bg-light border fw-medium">{{ tech }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if project.members.all %}
+            <h4 class="text-secondary text-uppercase small fw-semibold mb-2">Team</h4>
+            <ul class="list-unstyled mb-0">
+                {% for member in project.members.all %}
+                    <li class="d-flex justify-content-between border-top py-1 small">
+                        <span class="fw-semibold">{{ member.name }}</span>
+                        <span class="text-secondary">{{ member.role }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if user.is_authenticated and request.session.is_admin %}
+            <form action="{% url 'landing_page:update_project_status' project.pk %}" method="post" class="input-group input-group-sm mt-3">
+                {% csrf_token %}
+                <select name="status" class="form-select">
+                    {% for value, label in project.STATUS_CHOICES %}
+                        <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-dark">Update</button>
+            </form>
+            <div class="d-flex gap-2 mt-2">
+                <a href="{% url 'landing_page:edit_project' project.pk %}" class="btn btn-sm btn-outline-dark">Edit</a>
+                <form action="{% url 'landing_page:delete_project' project.pk %}" method="post" onsubmit="return confirm('Delete this project?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Delete project</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</article>

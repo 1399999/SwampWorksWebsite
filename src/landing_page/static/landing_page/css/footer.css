@@ -12,11 +12,11 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #e3e3e3;
-    border-top: 1px solid #cfcfcf;
+    background-color: #0b1f4b;
+    border-top: 4px solid #84cc16;
     font-family: var(--primary-font, Arial, Helvetica, sans-serif);
     font-size: 13px;
-    color: #444;
+    color: #fff;
 }
 
 .site-footer-inner {
@@ -42,7 +42,7 @@ body {
 }
 
 .site-footer a {
-    color: #1e40af;
+    color: #84cc16;
 }
 
 /* Site-wide font: buttons, inputs and textareas don't inherit fonts by default */

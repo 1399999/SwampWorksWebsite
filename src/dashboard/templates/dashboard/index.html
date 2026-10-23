@@ -4,24 +4,17 @@
 
 {% block content %}
 
-<h1>Hi there, <strong>{{request.user}}</strong>. Welcome to the dashboard</h1>
+<header class="bg-light border-bottom py-5">
+    <div class="container py-4">
+        <span class="d-block mb-3 text-primary text-uppercase small fw-semibold">Dashboard</span>
+        <h1 class="display-3">Hi there, {{ request.user }}.</h1>
+        <p class="lead text-secondary mb-0">Welcome to the dashboard.</p>
+    </div>
+</header>
 
-This is a blank dashboard page which inherits from dashboard/base.html. It has seperate CSS from the landing page and is located at <strong>dashboard/static/dashboard/css/dashboard.css</strong>
-
-<p><strong style="color:red;">Note: this page is login restricted and can only be accessed by logged in users.</strong></p>
-
-<h2>Instructions</h2>
-
-<ol>
-    <li>
-        There is one CSS file in this app - <strong>dashboard.css</strong>. Feel free to replace this CSS with your own custom CSS
-    </li>
-</ol>
-
-<p>To log out, click <a href="{% url 'accounts:logout' %}">here</a></p>
-
+<main class="container py-5">
+    <div class="alert alert-warning">Note: this page is login restricted and can only be accessed by logged in users.</div>
+    <p>To log out, click <a href="{% url 'accounts:logout' %}">here</a>.</p>
+</main>
 
 {% endblock content %}
-
-
-

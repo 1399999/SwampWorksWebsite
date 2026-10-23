@@ -1,47 +1,56 @@
 {% extends 'landing_page/base.html' %}
-{% load static %}
+{% load static bootstrap_extras %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'landing_page/css/ideas.css' %}">
 
-<main class="ideas-page">
-    <h1>Project Ideas</h1>
+<header class="bg-light border-bottom py-5">
+    <div class="container py-4">
+        <span class="d-block mb-3 text-primary text-uppercase small fw-semibold">What's next</span>
+        <h1 class="display-3">Project Ideas</h1>
+        <p class="lead text-secondary col-lg-7 mb-0">Have something you would like to see built? Share it here for the club to pick up.</p>
+    </div>
+</header>
 
-    <section class="idea-form-card">
-        <h2>Share an idea</h2>
-        <form method="post">
-            {% csrf_token %}
-            {% if form.errors %}
-                <p class="form-error">Please fix the errors below.</p>
-            {% endif %}
-            {% for field in form %}
-                <div class="form-row">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for error in field.errors %}
-                        <p class="form-error">{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Post Idea</button>
-        </form>
+<main class="container py-5">
+    <section class="card bg-light mb-5">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="h3">Share an idea</h2>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="alert alert-danger">Please fix the errors below.</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                        {{ field|add_class:"form-control" }}
+                        {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary text-uppercase">Post Idea</button>
+            </form>
+        </div>
     </section>
 
     {% if ideas %}
-        <div class="idea-list">
+        <div class="d-flex flex-column gap-3">
             {% for idea in ideas %}
-                <article class="idea-card">
-                    <p>{{ idea.description|linebreaksbr }}</p>
-                    {% if user.is_authenticated and request.session.is_admin %}
-                        <form action="{% url 'landing_page:delete_idea' idea.pk %}" method="post" class="remove-form" onsubmit="return confirm('Delete this idea?');">
-                            {% csrf_token %}
-                            <button type="submit">Delete idea</button>
-                        </form>
-                    {% endif %}
+                <article class="card border-top border-primary border-3 rounded-1">
+                    <div class="card-body">
+                        <p class="card-text">{{ idea.description|linebreaksbr }}</p>
+                        {% if user.is_authenticated and request.session.is_admin %}
+                            <form action="{% url 'landing_page:delete_idea' idea.pk %}" method="post" onsubmit="return confirm('Delete this idea?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Delete idea</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
-        <p class="no-ideas">No ideas yet. Be the first to post one.</p>
+        <p class="text-secondary">No ideas yet. Be the first to post one.</p>
     {% endif %}
 </main>
 {% endblock content %}
