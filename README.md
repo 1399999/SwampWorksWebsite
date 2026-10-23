@@ -1,121 +1,171 @@
-# SwampWorks Website
+# SwampWorks
 
-A Django club website built on the **django-quickstart** template. It adds a shared navbar, a club meetings calendar, a moderated projects gallery, an open project ideas board, and an admin area protected by a passkey.
+**SwampWorks Coding Club**: a platform that empowers coding club members to showcase their projects, manage ideas, and connect with the community through collaboration and resources.
 
-## Stack
+Members post what they are working on, pitch ideas for what to build next, and meet regularly to code side by side. Browse the projects, add your own, or drop an idea for someone else to pick up.
 
-- Django 5.1 with a custom `accounts.User` model (extends `AbstractUser`)
-- TailwindCSS via `django-tailwind` (the `theme` app), plus hand-written CSS per app
-- SQLite in development (`DEBUG=True`), Postgres and AWS S3 in production (`DEBUG=False`)
-- Pillow for image uploads
+> Built with Django and Bootstrap 5. Originally generated from the django-quickstart template (MIT), since refactored: Tailwind and the per-app CSS files were replaced by a shared Bootstrap layout.
 
-## Apps
+---
 
-| App | Purpose |
-|---|---|
-| `landing_page` | Public pages: home/about (calendar), projects, project ideas, contact |
-| `accounts` | Sign up, log in, log out, and the admin passkey login |
-| `dashboard` | Post-login page and the admin area (user management, project approvals) |
-| `theme` | django-tailwind build output |
+## What's on the site
 
-## Features
+Each page's heading and intro text comes straight from the UI.
 
-### Shared navbar
-A single partial at `landing_page/templates/partials/navbar.html` is included by the `base.html` of every app, so it appears on every page (including login and sign up). It contains About Us, Projects, Project Ideas, Contact, and Sign Up. The login slot shows **Log In** for visitors and **Log Out** (plus an **Admin** link) once signed in. Styling lives in `landing_page/static/landing_page/css/navbar.css`.
+### Home / About Us (`/` and `/about/`)
+*Coding Club: **SwampWorks***. The landing page introduces the platform and links to **View Projects** and **Share an Idea**.
 
-### Sign up
-The registration form (`CustomUserCreationForm`) asks for first name, last name, username, email, and password. First and last name are required. The admin "Add a user" form reuses the same form.
+- **Next meeting** card shows the soonest upcoming meeting (or "No meetings scheduled: check back soon").
+- **About us: "Build together, learn together."** explains how the club works.
+- **Club Meetings** is a month-grid calendar with Prev/Next navigation, plus an **Upcoming Meetings** list. Admins can add and delete meetings.
 
-### Landing page and calendar
-- `/` and `/about/` render the same page (both URLs point to the `index` view).
-- The page shows a month-grid calendar of club meetings with Prev/Next navigation, plus an upcoming meetings list.
-- Anyone can view it. Only an admin can add or delete meetings.
-- Model: `ClubMeeting` (title, description, date, optional time).
+`/about/` serves the same page as `/` (the About section is anchored at `#about`).
 
-### Projects
-- Anyone, logged in or not, can submit a project (image and description) at `/projects/`.
-- New submissions are saved with `is_approved=False` and are hidden from the public page.
-- When a project is submitted, an email is sent to `ADMIN_EMAIL` linking to the admin area.
-- An admin approves or rejects each pending project from the admin area. Approving makes it public. Rejecting deletes it.
-- Each project has a **status** of Ongoing or Completed. Everyone can see the badge. Only an admin can change it.
-- Model: `Project` (image, description, status, is_approved, created_at).
+### Projects (`/projects/`)
+*What we build: "See what club members are working on, and add your own for the community to see."*
 
-### Project ideas
-`/ideas/` is a separate board where anyone can post a text-only idea with no login or approval. Model: `Idea` (description, created_at).
+- **Current Projects** and **Previous Projects** are two sections, split by each project's status (ongoing or completed).
+- Each project card shows a photo carousel, title, description, technology badges, and a team list with roles.
+- **Add a project**: *"Submitted projects are reviewed by an admin before they appear here."* The form takes a title, description, technologies, photos, and team rows (*"Add everyone who worked on the project and their role. Leave unused rows blank."*). **Logged-in users only**; logged-out visitors see a Log In / Sign Up prompt instead.
+- Admins also get a status dropdown, **Edit**, and **Delete project** on each card.
 
-### Admin access
-Admin access is a second step on top of a normal login:
-1. Log in as a regular user.
-2. Click **Admin** in the navbar and enter the passkey (`ADMIN_PASSKEY` in `.env`).
-3. The session is flagged with `is_admin`, which unlocks admin-only actions (calendar editing, project status, approvals, and the admin area).
+### Edit Project (`/projects/<id>/edit/`, admin only)
+*Admin: Edit Project.* Change the title, description, technologies, and status. *"Tick a photo to remove it when you save"*, add more photos, and manage the team (*"Tick 'Remove' on a row to delete that person. Use the blank rows to add people."*). Cancel returns to where you came from.
 
-The flag lasts for the session and is cleared on logout. Every admin action is checked server-side, not just hidden in the templates.
+### Project Ideas (`/ideas/`)
+*What's next: "Have something you would like to see built? Share it here for the club to pick up."*
 
-### Admin area (`/dashboard/admin/`)
-- **Pending Projects**: approve or reject submissions.
-- **Users**: view username, email, staff status, and join date (never passwords), and delete users. Admins cannot delete their own account.
+Anyone can read the ideas. Posting (**Share an idea**) needs a login. Admins can delete ideas.
+
+### Contact Us (`/contact/`)
+*Get in touch: "Questions about the club or the site? Reach out to any of our officers."*
+
+A list of officers with role and a mailto link. Admins can add and remove contacts.
+
+### Log In, Register, Admin Login (`/accounts/...`)
+Centered card forms. Registration collects first name, last name, username, email, and password. **Admin Login** (reachable from the navbar's **Admin** link once logged in) asks for the admin passkey.
+
+### Dashboard (`/dashboard/`)
+*"Hi there, {username}. Welcome to the dashboard."* A login-restricted landing page for members, with a log out link.
+
+### Admin Area (`/dashboard/admin/`)
+*"Approve submitted projects and manage user accounts."*
+
+- **Pending Projects**: Approve, Edit, or Reject each submission.
+- **Users**: view username, email, staff status, and join date (never passwords); delete users (not yourself).
 - **Add a user**: create accounts with the same validation as public sign up.
 
-## URL map
+### Navbar and footer (every page)
+- Navbar: **SwampWorks / Coding Club** brand; About Us, Projects, Project Ideas, Contact; **Log In** and **Sign Up** when logged out, **Admin** and **Log Out** when logged in. The current page is highlighted.
+- Footer: *"Showcase projects, share ideas, and connect with the community."* with quick links, plus **SwampWorks Coding Club** and **Green Level High School's Coding club**.
 
-| URL | Page |
+---
+
+## Who can do what
+
+| | Visitor | Logged-in member | Admin (passkey) |
+|---|---|---|---|
+| View projects, ideas, contacts, calendar | yes | yes | yes |
+| Submit a project (goes to approval) | no | yes | yes |
+| Post an idea | no | yes | yes |
+| Approve / reject / edit / delete projects, change status | no | no | yes |
+| Delete ideas | no | no | yes |
+| Add / delete calendar meetings | no | no | yes |
+| Add / remove contacts | no | no | yes |
+| View / add / delete users | no | no | yes |
+
+Every restricted action is enforced in the view, not only hidden in the template.
+
+### How admin access works
+Admin is a second step on top of a normal login:
+1. Log in as a regular user.
+2. Click **Admin** in the navbar and enter the passkey (`ADMIN_PASSKEY` in `.env`).
+3. The session is flagged `is_admin`, which unlocks the admin-only actions above. The flag ends on logout or when the session expires.
+
+### How project approval works
+1. A logged-in member submits a project. It is saved as unapproved and hidden from the public page.
+2. An email goes to `ADMIN_EMAIL` linking to the admin area. Ideas also trigger a short email labeled as an idea.
+3. An admin reviews it under **Pending Projects**, optionally edits it, then approves it (it appears under Current Projects) or rejects it (deleted).
+
+---
+
+## Code structure
+
+```
+swamp_works/            project settings and root URLs
+accounts/               custom User model, login, register, logout, admin passkey login
+dashboard/              post-login page and the admin area (users, pending projects)
+landing_page/           public pages, calendar, projects, ideas, contacts
+  templatetags/bootstrap_extras.py      add_class filter
+  static/landing_page/css/theme.css     site theme on top of Bootstrap
+  templates/landing_page/               base, index, about, projects, edit_project, ideas, contact
+  templates/partials/                   navbar, footer, project_card, project_carousel
+accounts/templates/accounts/            base, login, register, admin_login
+dashboard/templates/dashboard/          base, index, admin
+```
+
+### The refactor
+- **One look for the whole site.** Every page extends a `base.html` that loads Bootstrap 5.3.3 (CSS and JS from a CDN) and `theme.css`, and includes the shared navbar and footer. The three apps each have a `base.html` (landing page, accounts card layout, dashboard) that share the same partials.
+- **No Tailwind and no per-app CSS.** The npm build, the `theme` app, and `django-tailwind` are gone; styling is Bootstrap utility classes plus the small `theme.css`. The old stylesheets (`reset.css`, `navbar.css`, `calendar.css`, `auth.css`, and so on) are no longer linked and can be deleted.
+- **Reusable partials.** `navbar.html` and `footer.html` appear on every page. `project_card.html` renders a project everywhere it's listed (including admin controls), and `project_carousel.html` renders its photos. The admin area reuses both.
+- **Forms rendered with one filter.** Templates load `bootstrap_extras` and use `{{ field|add_class:"form-control" }}` so Django forms pick up Bootstrap styling without custom widgets.
+- **Shared layout.** `d-flex flex-column min-vh-100` on `<body>` keeps the footer at the bottom of short pages, and `base.html` has an `extra_head` block for page-specific head content.
+- **Theme.** `theme.css` holds the palette (navy, lime green, and white) and overrides Bootstrap's primary, dark, and button colors.
+
+### Data model (as the templates use it)
+| Model | Fields |
 |---|---|
-| `/`, `/about/` | Landing page with calendar |
-| `/projects/` | Projects gallery and submission form |
-| `/ideas/` | Project ideas board |
-| `/contact/` | Blank page |
-| `/accounts/login/`, `/accounts/register/`, `/accounts/logout/` | Authentication |
-| `/accounts/admin-login/` | Admin passkey entry (login required) |
-| `/dashboard/` | Post-login page |
-| `/dashboard/admin/` | Admin area (passkey required) |
-| `/admin/` | Django's built-in admin site |
+| `Project` | title, description, technologies (comma-separated, exposed as `technology_list`), status (`ongoing` / `completed`), is_approved, created_at |
+| `ProjectImage` | project, image (many per project; drives the carousel) |
+| `ProjectMember` | project, name, role (the team list) |
+| `Idea` | description, created_at |
+| `ClubMeeting` | title, description, date, optional time |
+| `Contact` | name, role, email |
+| `accounts.User` | Django `AbstractUser` (first name, last name, username, email) |
+
+### URL names the templates use
+- `landing_page:` index, about, projects, edit_project, update_project_status, approve_project, reject_project, delete_project, ideas, delete_idea, contact, delete_contact, delete_meeting
+- `accounts:` login, register, logout, admin_login
+- `dashboard:` index, admin, admin_delete_user
+
+---
 
 ## Setup
 
 ```bash
 python -m venv env
-env\Scripts\activate          # Windows
+env\Scripts\activate            # Windows (macOS/Linux: source env/bin/activate)
 pip install -r requirements.txt
-pip install Pillow
-python manage.py tailwind install
+pip install Pillow              # needed for image uploads
 python manage.py makemigrations landing_page
 python manage.py migrate
-```
-
-Run the two servers in separate terminals:
-
-```bash
-python manage.py tailwind start
 python manage.py runserver
 ```
 
-### Media uploads
-Add to `settings.py`:
+There is no second terminal or npm step any more. After adding a new template tag file, restart the server.
 
+### Media uploads
+`settings.py`:
 ```python
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 ```
-
-And at the bottom of the project `urls.py`:
-
+and at the bottom of the project `urls.py`:
 ```python
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
+Add `media/` to `.gitignore`. With `DEBUG=False` the project switches to Postgres and S3 (see the `if not DEBUG` blocks in `settings.py`).
 
-Consider adding `media/` to `.gitignore`.
-
-### Environment variables (`.env`)
-
+### Environment variables (`.env`, next to `manage.py`)
 ```
 DEBUG="True"
 SECRET_KEY="..."
 ADMIN_PASSKEY="choose-a-strong-passkey"
 
-# Project approval emails
+# Notification emails
 ADMIN_EMAIL="where-notifications-go@example.com"
 EMAIL_HOST="smtp.gmail.com"
 EMAIL_PORT="587"
@@ -124,22 +174,10 @@ EMAIL_HOST_PASSWORD="gmail-app-password"
 EMAIL_USE_TLS="True"
 DEFAULT_FROM_EMAIL="sending-account@gmail.com"
 ```
-
-Settings read these with `os.environ.get(...)`: `ADMIN_PASSKEY`, `ADMIN_EMAIL`, and the `EMAIL_*` values.
+`settings.py` reads these with `os.environ.get(...)`: `ADMIN_PASSKEY = os.environ.get('ADMIN_PASSKEY')`, `ADMIN_EMAIL`, and the `EMAIL_*` values.
 
 ### Sending real email
-Gmail needs 2-Step Verification and an **App Password** (not your normal password). With `DEBUG=True`, the default backend only prints emails to the terminal. To send real email locally, set this in `settings.py`:
+Gmail needs 2-Step Verification and an **App Password**, not your normal password. With `DEBUG=True` the default email backend only prints to the terminal; to really send, set `EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'` in `settings.py`. Don't set `DEBUG=False` just to send email.
 
-```python
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-```
-
-Do not set `DEBUG=False` just to send email, because that also switches the project to Postgres and S3.
-
-## Notes and known limits
-
-- `/ideas/` has no spam protection. Anyone, including bots, can post.
-- Meetings can be added and deleted, but not edited.
-- Rejected projects are deleted outright, not archived.
-- `is_admin` is a per-session flag using one shared passkey, not a permanent role.
-- Each `views.py`, `urls.py`, and `models.py` must be replaced in full when updating. Partial copies cause errors such as `module 'landing_page.views' has no attribute ...`.
+### If the admin passkey is rejected
+Print what Django loaded: `python manage.py shell -c "from django.conf import settings; print(repr(settings.ADMIN_PASSKEY))"`. `None` means `.env` isn't being read (wrong folder, missing `ADMIN_PASSKEY` line in `settings.py`, or a hidden byte-order mark when the passkey is the first line); a trailing space inside the quotes counts as part of the passkey. Restart the server after editing `.env`.

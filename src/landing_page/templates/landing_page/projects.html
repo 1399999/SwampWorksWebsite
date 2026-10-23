@@ -41,6 +41,7 @@
         {% endif %}
     </section>
 
+    {% if user.is_authenticated %}
     <section class="card bg-light" id="add-project">
         <div class="card-body p-4 p-md-5">
             <h2 class="h3">Add a project</h2>
@@ -88,5 +89,6 @@
             </form>
         </div>
     </section>
+    {% endif %}
 </main>
 {% endblock content %}
