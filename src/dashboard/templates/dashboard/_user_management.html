@@ -1,0 +1,63 @@
+{% load bootstrap_extras %}
+<section class="mb-5">
+    <h2 class="h3 mb-4">Users</h2>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle border-top border-dark">
+            <thead>
+                <tr class="text-secondary text-uppercase small">
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Staff</th>
+                    <th>Date Joined</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in users %}
+                    <tr>
+                        <td>{{ account.username }}</td>
+                        <td>{{ account.email }}</td>
+                        <td>{{ account.is_staff|yesno:"Yes,No" }}</td>
+                        <td>{{ account.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if account.pk != user.pk %}
+                                <form action="{% url 'dashboard:admin_delete_user' account.pk %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            {% else %}
+                                <span class="text-secondary small">(you)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">No users found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card bg-light col-lg-5">
+    <div class="card-body p-4">
+        <h2 class="h4">Add a user</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="alert alert-danger">Please fix the errors below.</div>
+            {% endif %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                    {{ field|add_class:"form-control" }}
+                    {% for error in field.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary text-uppercase">Add User</button>
+        </form>
+    </div>
+</section>

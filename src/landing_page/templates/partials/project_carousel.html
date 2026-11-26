@@ -1,5 +1,5 @@
 {% with images=project.images.all %}
-    <div class="ratio ratio-16x9 bg-primary">
+    <div class="ratio ratio-16x9 bg-primary z-2">
         <div id="project-carousel-{{ project.pk }}" class="carousel slide">
             {% if images|length > 1 %}
                 <div class="carousel-indicators">

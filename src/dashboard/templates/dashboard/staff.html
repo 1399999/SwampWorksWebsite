@@ -1,0 +1,47 @@
+{% extends 'dashboard/base.html' %}
+{% load static bootstrap_extras %}
+
+{% block content %}
+
+<header class="bg-light border-bottom py-5">
+    <div class="container py-4">
+        <span class="d-block mb-3 text-primary text-uppercase small fw-semibold">Staff</span>
+        <h1 class="display-3">Staff Area</h1>
+        <p class="lead text-secondary col-lg-7 mb-0">You make the final decision on every submitted project. A project is only published when staff approve it.</p>
+    </div>
+</header>
+
+<main class="container py-5">
+    <section class="mb-5">
+        <h2 class="h3 mb-4">Approved by an Admin ({{ admin_reviewed_projects|length }})</h2>
+        {% if admin_reviewed_projects %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for project in admin_reviewed_projects %}
+                    <div class="col">
+                        {% include 'partials/pending_project_card.html' %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-secondary">No projects have been approved by an admin yet.</p>
+        {% endif %}
+    </section>
+
+    <section class="mb-5">
+        <h2 class="h3 mb-4">Not Reviewed Yet ({{ unreviewed_projects|length }})</h2>
+        {% if unreviewed_projects %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for project in unreviewed_projects %}
+                    <div class="col">
+                        {% include 'partials/pending_project_card.html' %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-secondary">No other projects are waiting.</p>
+        {% endif %}
+    </section>
+
+    {% include 'dashboard/_user_management.html' %}
+</main>
+{% endblock content %}

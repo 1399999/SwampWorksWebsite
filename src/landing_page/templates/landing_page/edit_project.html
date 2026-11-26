@@ -1,0 +1,116 @@
+{% extends 'landing_page/base.html' %}
+{% load static bootstrap_extras %}
+{% block content %}
+
+<main class="container py-5">
+    <form method="post" enctype="multipart/form-data" class="row justify-content-center">
+        {% csrf_token %}
+        <div class="col-lg-7">
+            {% if form.errors or member_formset.total_error_count %}
+                <div class="alert alert-danger">
+                    Please fix the errors below.
+                    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                </div>
+            {% endif %}
+            <div class="card rounded-4 overflow-hidden shadow-sm mb-3">
+                {% include 'partials/project_carousel.html' %}
+            </div>
+
+            <div class="card bg-light mb-5">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-secondary">Photos</h2>
+                    {% if project.images.all %}
+                        <p class="text-secondary small">Tick a photo to remove it when you save.</p>
+                        <div class="row row-cols-3 g-2 mb-3">
+                            {% for image in project.images.all %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <div class="ratio ratio-4x3">
+                                            <img src="{{ image.image.url }}" alt="Photo {{ forloop.counter }}" class="card-img-top rounded-0 object-fit-cover">
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="delete_images" value="{{ image.pk }}" id="delete-image-{{ image.pk }}">
+                                                <label class="form-check-label small" for="delete-image-{{ image.pk }}">Remove</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <label for="{{ form.new_images.id_for_label }}" class="form-label fw-semibold">{{ form.new_images.label }}</label>
+                    {{ form.new_images|add_class:"form-control" }}
+                    <div class="form-text">{{ form.new_images.help_text }}</div>
+                    {% for error in form.new_images.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+            </div>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'landing_page:projects' %}">Projects</a></li>
+                    <li class="breadcrumb-item"><a href="{{ back_url }}">{{ project.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Editing</li>
+                </ol>
+            </nav>
+
+            <div class="mb-3">
+                <label for="{{ form.status.id_for_label }}" class="form-label text-uppercase small fw-semibold text-secondary">Status</label>
+                {{ form.status|add_class:"form-select" }}
+                {% for error in form.status.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <label for="{{ form.title.id_for_label }}" class="form-label text-uppercase small fw-semibold text-secondary">Title</label>
+                {{ form.title|add_class:"form-control form-control-lg" }}
+                {% for error in form.title.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+
+            <h2 class="h3">About this project</h2>
+            <div class="mb-5">
+                {{ form.description|add_class:"form-control" }}
+                {% for error in form.description.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+
+            <h2 class="h4">Built with</h2>
+            <div class="mb-5">
+                {{ form.technologies|add_class:"form-control" }}
+                <div class="form-text">{{ form.technologies.help_text }}</div>
+                {% for error in form.technologies.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+
+            <h2 class="h4">Team</h2>
+            <p class="text-secondary small">Tick "Remove" to delete a person. Use the blank rows to add people.</p>
+            {{ member_formset.management_form }}
+            <div class="mb-5">
+                {% for member_form in member_formset %}
+                    {% for hidden in member_form.hidden_fields %}{{ hidden }}{% endfor %}
+                    <div class="row g-2 mb-2 align-items-start">
+                        <div class="col-sm-5">
+                            {{ member_form.name|add_class:"form-control" }}
+                            {% for error in member_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-sm-5">
+                            {{ member_form.role|add_class:"form-control" }}
+                            {% for error in member_form.role.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-sm-2">
+                            {% if member_form.instance.pk %}
+                                <div class="form-check mt-2">
+                                    {{ member_form.DELETE|add_class:"form-check-input" }}
+                                    <label class="form-check-label small" for="{{ member_form.DELETE.id_for_label }}">Remove</label>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary text-uppercase">Save Changes</button>
+                <a href="{{ back_url }}" class="btn btn-outline-dark text-uppercase">Cancel</a>
+            </div>
+        </div>
+    </form>
+</main>
+{% endblock content %}

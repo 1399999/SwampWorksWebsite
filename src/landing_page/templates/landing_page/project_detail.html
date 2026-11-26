@@ -1,0 +1,58 @@
+{% extends 'landing_page/base.html' %}
+{% load static %}
+{% block content %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card rounded-4 overflow-hidden shadow-sm mb-5">
+                {% include 'partials/project_carousel.html' %}
+            </div>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'landing_page:projects' %}">Projects</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ project.title }}</li>
+                </ol>
+            </nav>
+
+            <span class="badge rounded-1 text-uppercase mb-3 {% if project.status == 'completed' %}text-bg-dark{% else %}text-bg-primary{% endif %}">{{ project.get_status_display }}</span>
+            {% if not project.is_approved %}
+                <span class="badge rounded-1 text-uppercase mb-3 text-bg-warning">Pending approval</span>
+            {% endif %}
+            <h1 class="display-4 mb-4">{{ project.title }}</h1>
+
+            <h2 class="h3">About this project</h2>
+            <p class="lead mb-5">{{ project.description|linebreaksbr }}</p>
+
+            {% if project.technology_list %}
+                <h2 class="h4">Built with</h2>
+                <div class="d-flex flex-wrap gap-2 mb-5">
+                    {% for tech in project.technology_list %}
+                        <span class="badge rounded-pill text-bg-light border fw-medium fs-6">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if project.members.all %}
+                <h2 class="h4">Team</h2>
+                <ul class="list-group list-group-flush border-top border-dark mb-5">
+                    {% for member in project.members.all %}
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="fw-semibold">{{ member.name }}</span>
+                            <span class="text-secondary">{{ member.role }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'landing_page:projects' %}" class="btn btn-outline-dark text-uppercase">&laquo; All Projects</a>
+                {% if user.is_authenticated and request.session.is_admin %}
+                    <a href="{% url 'landing_page:edit_project' project.pk %}" class="btn btn-primary text-uppercase">Edit</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

@@ -1,13 +1,30 @@
 import calendar
 from datetime import date
+from functools import wraps
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 
-from .forms import ProjectForm, IdeaForm, MeetingForm, ContactForm
-from .models import Project, Idea, ClubMeeting, Contact
+from .forms import (
+    ProjectForm, ProjectMemberFormSet, ProjectEditForm, EditMemberFormSet,
+    IdeaForm, MeetingForm, ContactForm,
+)
+from .models import Project, ProjectImage, Idea, ClubMeeting, Contact
+
+
+def login_required_to_post(view):
+    """Anyone can view the page, but submitting its form needs a login."""
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        if request.method == 'POST' and not request.user.is_authenticated:
+            return redirect('accounts:login')
+        return view(request, *args, **kwargs)
+    return wrapper
 
 
 def _is_admin(request):
@@ -23,8 +40,9 @@ def _notify_admin_of_new_project(request, project):
         subject='New project submitted for approval',
         message=(
             f"A new project was submitted and is waiting for approval.\n\n"
+            f"Title: {project.title}\n"
             f"Description: {project.description}\n\n"
-            f"Review and approve it here: {review_url}"
+            f"Review, edit and approve it here: {review_url}"
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[settings.ADMIN_EMAIL],
@@ -131,26 +149,83 @@ def about(request):
     return render(request, 'landing_page/about.html')
 
 
+def _save_new_images(project, files):
+    for uploaded in files:
+        ProjectImage.objects.create(project=project, image=uploaded)
+
+
+@login_required_to_post
 def projects(request):
     submitted = False
 
     if request.method == 'POST':
-        # anyone - logged in or not - can submit a project, but it starts unapproved
+        # logged-in members can submit a project, but it starts unapproved
         form = ProjectForm(request.POST, request.FILES)
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.is_approved = False
-            project.save()
+        member_formset = ProjectMemberFormSet(request.POST, instance=Project())
+        if form.is_valid() and member_formset.is_valid():
+            with transaction.atomic():
+                project = form.save(commit=False)
+                project.is_approved = False
+                project.save()
+                _save_new_images(project, form.cleaned_data['new_images'])
+                member_formset.instance = project
+                member_formset.save()
             _notify_admin_of_new_project(request, project)
-            return redirect(reverse('landing_page:projects') + '?submitted=1')
+            return redirect(reverse('landing_page:projects') + '?submitted=1#add-project')
     else:
         form = ProjectForm()
+        member_formset = ProjectMemberFormSet(instance=Project())
         submitted = request.GET.get('submitted') == '1'
 
+    approved = Project.objects.filter(is_approved=True).prefetch_related('images', 'members')
+
     return render(request, 'landing_page/projects.html', {
-        'projects': Project.objects.filter(is_approved=True),
+        'ongoing_projects': approved.filter(status='ongoing'),
+        'completed_projects': approved.filter(status='completed'),
         'form': form,
+        'member_formset': member_formset,
         'submitted': submitted,
+    })
+
+
+def project_detail(request, project_id):
+    project = get_object_or_404(
+        Project.objects.prefetch_related('images', 'members'),
+        pk=project_id,
+    )
+    # pending projects are only visible to admins
+    if not project.is_approved and not _is_admin(request):
+        raise Http404
+    return render(request, 'landing_page/project_detail.html', {'project': project})
+
+
+def edit_project(request, project_id):
+    # only admins can edit a project (pending or already approved)
+    if not _is_admin(request):
+        return redirect('landing_page:projects')
+
+    project = get_object_or_404(Project, pk=project_id)
+    back_url = reverse('landing_page:project_detail', args=[project.pk])
+
+    if request.method == 'POST':
+        form = ProjectEditForm(request.POST, request.FILES, instance=project)
+        member_formset = EditMemberFormSet(request.POST, instance=project)
+        if form.is_valid() and member_formset.is_valid():
+            with transaction.atomic():
+                form.save()
+                form.cleaned_data['delete_images'].delete()
+                _save_new_images(project, form.cleaned_data['new_images'])
+                member_formset.save()
+            return redirect(back_url)
+    else:
+        form = ProjectEditForm(instance=project)
+        member_formset = EditMemberFormSet(instance=project)
+
+    return render(request, 'landing_page/edit_project.html', {
+        'project': project,
+        'form': form,
+        'member_formset': member_formset,
+        'back_url': back_url,
     })
 
 
@@ -168,27 +243,45 @@ def update_project_status(request, project_id):
     return redirect('landing_page:projects')
 
 
+def _is_staff(request):
+    return request.user.is_authenticated and request.session.get('is_staff_member')
+
+
+def _review_page(request):
+    return redirect('dashboard:staff') if _is_staff(request) else redirect('dashboard:admin')
+
+
 def approve_project(request, project_id):
     if not _is_admin(request):
         return redirect('dashboard:admin')
 
     if request.method == 'POST':
         project = get_object_or_404(Project, pk=project_id)
-        project.is_approved = True
+        now = timezone.now()
+        if _is_staff(request):
+            # staff make the final decision: this is what publishes the project
+            project.staff_approved_by = request.user
+            project.staff_approved_at = now
+            project.is_approved = True
+        elif not project.admin_approved_by:
+            # an admin's approval is a sign-off that staff can see; it does not publish
+            project.admin_approved_by = request.user
+            project.admin_approved_at = now
         project.save()
 
-    return redirect('dashboard:admin')
+    return _review_page(request)
 
 
 def reject_project(request, project_id):
-    if not _is_admin(request):
+    # only staff make the final decision, so only staff can reject
+    if not _is_staff(request):
         return redirect('dashboard:admin')
 
     if request.method == 'POST':
         project = get_object_or_404(Project, pk=project_id)
         project.delete()
 
-    return redirect('dashboard:admin')
+    return redirect('dashboard:staff')
 
 
 def delete_project(request, project_id):
@@ -213,6 +306,7 @@ def delete_idea(request, idea_id):
     return redirect('landing_page:ideas')
 
 
+@login_required_to_post
 def ideas(request):
     if request.method == 'POST':
         form = IdeaForm(request.POST)

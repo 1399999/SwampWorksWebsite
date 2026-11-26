@@ -41,10 +41,10 @@
         {% endif %}
     </section>
 
-    {% if user.is_authenticated %}
     <section class="card bg-light" id="add-project">
         <div class="card-body p-4 p-md-5">
             <h2 class="h3">Add a project</h2>
+        {% if user.is_authenticated %}
             <p class="text-secondary small">Submitted projects are reviewed by an admin before they appear here.</p>
 
             {% if submitted %}
@@ -87,8 +87,14 @@
 
                 <button type="submit" class="btn btn-primary text-uppercase mt-3">Submit Project</button>
             </form>
+        {% else %}
+            <p class="text-secondary mb-3">You need to be logged in to add a project.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary text-uppercase">Log In</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-outline-dark text-uppercase">Sign Up</a>
+            </div>
+        {% endif %}
         </div>
     </section>
-    {% endif %}
 </main>
 {% endblock content %}

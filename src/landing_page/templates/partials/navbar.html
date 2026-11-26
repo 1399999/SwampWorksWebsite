@@ -1,4 +1,4 @@
-{% load static %}
+{% load static bootstrap_extras %}
 <nav class="navbar navbar-expand-lg bg-white border-bottom">
     <div class="container">
         <a href="{% url 'landing_page:index' %}" class="navbar-brand fw-bolder lh-1">
@@ -12,7 +12,23 @@
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-lg-4 me-auto">
                 <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'landing_page:about' %}">About Us</a></li>
-                <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'projects' %}active{% endif %}" href="{% url 'landing_page:projects' %}">Projects</a></li>
+                {% nav_projects as menu_projects %}
+                <li class="nav-item dropdown" id="projectsDropdown">
+                    <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'projects' or request.resolver_match.url_name == 'project_detail' or request.resolver_match.url_name == 'edit_project' %}active{% endif %}" href="{% url 'landing_page:projects' %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Projects</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item fw-semibold" href="{% url 'landing_page:projects' %}">All Projects</a></li>
+                        {% regroup menu_projects by get_status_display as status_groups %}
+                        {% for group in status_groups %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{% if group.grouper == 'Ongoing' %}Current Projects{% else %}Previous Projects{% endif %}</h6></li>
+                            {% for menu_project in group.list %}
+                                <li><a class="dropdown-item" href="{% url 'landing_page:project_detail' menu_project.pk %}">{{ menu_project.title }}</a></li>
+                            {% endfor %}
+                        {% empty %}
+                            <li><span class="dropdown-item-text text-secondary">No projects yet</span></li>
+                        {% endfor %}
+                    </ul>
+                </li>
                 <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'ideas' %}active{% endif %}" href="{% url 'landing_page:ideas' %}">Project Ideas</a></li>
                 <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'landing_page:contact' %}">Contact</a></li>
             </ul>
@@ -20,6 +36,7 @@
             <div class="d-flex align-items-center gap-3">
                 {% if user.is_authenticated %}
                     <a href="{% url 'accounts:admin_login' %}" class="nav-link">Admin</a>
+                    <a href="{% url 'accounts:staff_login' %}" class="nav-link">Staff</a>
                     <a href="{% url 'accounts:logout' %}" class="nav-link">Log Out</a>
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="nav-link">Log In</a>
@@ -31,3 +48,30 @@
         </div>
     </div>
 </nav>
+<script>
+    // this creates the hover over Projects navbar
+    document.addEventListener('DOMContentLoaded', function () {
+        var item = document.getElementById('projectsDropdown');
+        if (!item || !window.bootstrap) return;
+        var toggle = item.querySelector('[data-bs-toggle="dropdown"]');
+        var dropdown = bootstrap.Dropdown.getOrCreateInstance(toggle);
+        var isDesktop = function () { return window.matchMedia('(min-width: 992px)').matches; };
+        var hideTimer;
+        item.addEventListener('mouseenter', function () {
+            if (!isDesktop()) return;
+            clearTimeout(hideTimer);
+            dropdown.show();
+        });
+        item.addEventListener('mouseleave', function () {
+            if (!isDesktop()) return;
+            hideTimer = setTimeout(function () { dropdown.hide(); }, 150);
+        });
+        // On desktop the "Projects" label itself goes to the projects page; on mobile it opens the menu.
+        toggle.addEventListener('click', function (event) {
+            if (!isDesktop()) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.location.href = toggle.href;
+        }, true);
+    });
+</script>

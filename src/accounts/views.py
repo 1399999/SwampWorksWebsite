@@ -101,3 +101,25 @@ def admin_login_view(request):
             })
     elif request.method == 'GET':
         return render(request, 'accounts/admin_login.html')
+
+
+@login_required
+def staff_login_view(request):
+
+    #only logged in users can attempt this, and only non-staff need to see the form
+    if request.session.get('is_staff_member'):
+        return redirect('dashboard:staff')
+
+    if request.method == 'POST':
+        passkey = request.POST.get('passkey', '')
+        if passkey and passkey == settings.STAFF_PASSKEY:
+            #staff can do everything an admin can, so they also get the admin flag
+            request.session['is_staff_member'] = True
+            request.session['is_admin'] = True
+            return redirect('dashboard:staff')
+        else:
+            return render(request, 'accounts/staff_login.html', {
+                'message': 'Incorrect passkey'
+            })
+    elif request.method == 'GET':
+        return render(request, 'accounts/staff_login.html')

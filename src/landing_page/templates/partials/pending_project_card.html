@@ -1,0 +1,51 @@
+<article class="card h-100 border-top border-primary border-3 rounded-1">
+    {% include 'partials/project_carousel.html' %}
+    <div class="card-body">
+        <h3 class="h5"><a href="{% url 'landing_page:project_detail' project.pk %}" class="text-decoration-none">{{ project.title }}</a></h3>
+        <p class="card-text">{{ project.description|linebreaksbr }}</p>
+        {% if project.technology_list %}
+            <div class="d-flex flex-wrap gap-2 mb-2">
+                {% for tech in project.technology_list %}
+                    <span class="badge rounded-pill text-bg-light border fw-medium">{{ tech }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% for member in project.members.all %}
+            <div class="d-flex justify-content-between border-top py-1 small">
+                <span class="fw-semibold">{{ member.name }}</span>
+                <span class="text-secondary">{{ member.role }}</span>
+            </div>
+        {% endfor %}
+
+        <div class="mt-3">
+            {% if project.admin_approved_by %}
+                <div class="alert alert-success py-2 small mb-0">
+                    <strong>Approved by admin:</strong> {{ project.admin_approved_by.get_full_name|default:project.admin_approved_by.username }}
+                    <div class="text-secondary">{{ project.admin_approved_at|date:"M d, Y g:i A" }}</div>
+                </div>
+            {% else %}
+                <div class="alert alert-secondary py-2 small mb-0">Not reviewed by an admin yet</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-footer bg-transparent border-0 d-flex flex-wrap gap-2 pb-3">
+        {% if request.session.is_staff_member %}
+            <form action="{% url 'landing_page:approve_project' project.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-primary">Approve (publish)</button>
+            </form>
+            <form action="{% url 'landing_page:reject_project' project.pk %}" method="post" onsubmit="return confirm('Reject and delete this project?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+            </form>
+        {% elif project.admin_approved_by %}
+            <span class="badge text-bg-warning align-self-center">Waiting for staff decision</span>
+        {% else %}
+            <form action="{% url 'landing_page:approve_project' project.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+            </form>
+        {% endif %}
+        <a href="{% url 'landing_page:edit_project' project.pk %}" class="btn btn-sm btn-outline-dark">Edit</a>
+    </div>
+</article>

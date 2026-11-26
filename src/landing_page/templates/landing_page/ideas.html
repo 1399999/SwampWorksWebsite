@@ -11,10 +11,10 @@
 </header>
 
 <main class="container py-5">
-    {% if user.is_authenticated %}
     <section class="card bg-light mb-5">
         <div class="card-body p-4 p-md-5">
             <h2 class="h3">Share an idea</h2>
+        {% if user.is_authenticated %}
             <form method="post">
                 {% csrf_token %}
                 {% if form.errors %}
@@ -31,9 +31,15 @@
                 {% endfor %}
                 <button type="submit" class="btn btn-primary text-uppercase">Post Idea</button>
             </form>
+        {% else %}
+            <p class="text-secondary mb-3">You need to be logged in to share an idea.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary text-uppercase">Log In</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-outline-dark text-uppercase">Sign Up</a>
+            </div>
+        {% endif %}
         </div>
     </section>
-    {% endif %}
 
     {% if ideas %}
         <div class="d-flex flex-column gap-3">

@@ -1,0 +1,13 @@
+1) settings.py   (your commit already adds this line - it's listed here so nothing is missed)
+   STAFF_PASSKEY = os.environ.get('STAFF_PASSKEY')
+
+2) .env          (add next to ADMIN_PASSKEY; use a different value from the admin passkey)
+   STAFF_PASSKEY="choose-a-different-strong-passkey"
+
+3) terminal, from the folder with manage.py
+   python manage.py makemigrations landing_page
+   python manage.py migrate
+   (the commit's 0011_project_review_steps migration already covers the four new Project
+   fields, so this should report "No changes detected". If it offers a small AlterField on
+   Project.technologies, accept it - it only means max_length differs from my copy.)
+   Then restart runserver.

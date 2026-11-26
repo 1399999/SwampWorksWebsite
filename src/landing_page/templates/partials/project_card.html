@@ -1,8 +1,8 @@
-<article class="card h-100 rounded-4 overflow-hidden shadow-sm">
+<article class="card h-100 rounded-4 overflow-hidden shadow-sm position-relative">
     {% include 'partials/project_carousel.html' %}
 
     <div class="card-body p-4">
-        <h3 class="h4 mb-2">{{ project.title }}</h3>
+        <h3 class="h4 mb-2"><a href="{% url 'landing_page:project_detail' project.pk %}" class="stretched-link text-decoration-none">{{ project.title }}</a></h3>
         <p class="card-text mb-3">{{ project.description|linebreaksbr }}</p>
 
         {% if project.technology_list %}
@@ -26,6 +26,7 @@
         {% endif %}
 
         {% if user.is_authenticated and request.session.is_admin %}
+            <div class="position-relative z-2">
             <form action="{% url 'landing_page:update_project_status' project.pk %}" method="post" class="input-group input-group-sm mt-3">
                 {% csrf_token %}
                 <select name="status" class="form-select">
@@ -41,6 +42,7 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-danger">Delete project</button>
                 </form>
+            </div>
             </div>
         {% endif %}
     </div>
