@@ -32,9 +32,7 @@ def admin_index(request):
     return render(request, 'dashboard/admin.html', {
         'users': User.objects.all().order_by('username'),
         'form': form,
-        'pending_projects': Project.objects.filter(is_approved=False)
-            .select_related('admin_approved_by')
-            .prefetch_related('images', 'members'),
+        'pending_projects': Project.objects.filter(is_approved=False).prefetch_related('images', 'members'),
     })
 
 @login_required
@@ -51,34 +49,4 @@ def admin_delete_user(request, user_id):
         if user_to_delete.pk != request.user.pk:
             user_to_delete.delete()
 
-    if request.session.get('is_staff_member'):
-        return redirect('dashboard:staff')
     return redirect('dashboard:admin')
-
-@login_required
-def staff_index(request):
-
-    #only users who passed the staff passkey check can view this
-    if not request.session.get('is_staff_member'):
-        return redirect('accounts:staff_login')
-
-    #staff can do everything admins can, including adding users
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard:staff')
-    else:
-        form = CustomUserCreationForm()
-
-    pending = (
-        Project.objects.filter(is_approved=False)
-        .select_related('admin_approved_by')
-        .prefetch_related('images', 'members')
-    )
-    return render(request, 'dashboard/staff.html', {
-        'users': User.objects.all().order_by('username'),
-        'form': form,
-        'admin_reviewed_projects': pending.filter(admin_approved_by__isnull=False),
-        'unreviewed_projects': pending.filter(admin_approved_by__isnull=True),
-    })

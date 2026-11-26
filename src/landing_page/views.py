@@ -193,7 +193,7 @@ def project_detail(request, project_id):
         Project.objects.prefetch_related('images', 'members'),
         pk=project_id,
     )
-    # pending projects are only visible to admins
+    #pending projects can only be viewed by admins
     if not project.is_approved and not _is_admin(request):
         raise Http404
     return render(request, 'landing_page/project_detail.html', {'project': project})
@@ -243,45 +243,29 @@ def update_project_status(request, project_id):
     return redirect('landing_page:projects')
 
 
-def _is_staff(request):
-    return request.user.is_authenticated and request.session.get('is_staff_member')
-
-
-def _review_page(request):
-    return redirect('dashboard:staff') if _is_staff(request) else redirect('dashboard:admin')
-
-
 def approve_project(request, project_id):
     if not _is_admin(request):
         return redirect('dashboard:admin')
 
     if request.method == 'POST':
         project = get_object_or_404(Project, pk=project_id)
-        now = timezone.now()
-        if _is_staff(request):
-            # staff make the final decision: this is what publishes the project
-            project.staff_approved_by = request.user
-            project.staff_approved_at = now
-            project.is_approved = True
-        elif not project.admin_approved_by:
-            # an admin's approval is a sign-off that staff can see; it does not publish
-            project.admin_approved_by = request.user
-            project.admin_approved_at = now
+        project.is_approved = True
+        project.admin_approved_by = request.user
+        project.admin_approved_at = timezone.now()
         project.save()
 
-    return _review_page(request)
+    return redirect('dashboard:admin')
 
 
 def reject_project(request, project_id):
-    # only staff make the final decision, so only staff can reject
-    if not _is_staff(request):
+    if not _is_admin(request):
         return redirect('dashboard:admin')
 
     if request.method == 'POST':
         project = get_object_or_404(Project, pk=project_id)
         project.delete()
 
-    return redirect('dashboard:staff')
+    return redirect('dashboard:admin')
 
 
 def delete_project(request, project_id):

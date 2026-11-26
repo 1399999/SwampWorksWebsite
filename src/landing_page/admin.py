@@ -14,7 +14,7 @@ class ProjectMemberInline(admin.TabularInline):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'is_approved', 'admin_approved_by', 'staff_approved_by', 'created_at')
+    list_display = ('title', 'status', 'is_approved', 'admin_approved_by', 'created_at')
     list_filter = ('status', 'is_approved')
     inlines = [ProjectImageInline, ProjectMemberInline]
 
