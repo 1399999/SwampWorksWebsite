@@ -86,13 +86,18 @@ def register_view(request):
 @login_required
 def admin_login_view(request):
 
-    #only logged in users can attempt this, and only non-admins need to see the form
-    if request.session.get('is_admin'):
+    #admins (the role, or an already-unlocked session) never need the passkey
+    if request.user.role == 'admin' or request.session.get('is_admin'):
         return redirect('dashboard:admin')
 
     if request.method == 'POST':
         passkey = request.POST.get('passkey', '')
         if passkey and passkey == settings.ADMIN_PASSKEY:
+            #the right passkey makes this user a permanent admin
+            request.user.role = 'admin'
+            request.user.admin_token_hash = ''
+            request.user.admin_token_created = None
+            request.user.save(update_fields=['role', 'admin_token_hash', 'admin_token_created'])
             request.session['is_admin'] = True
             return redirect('dashboard:admin')
         else:

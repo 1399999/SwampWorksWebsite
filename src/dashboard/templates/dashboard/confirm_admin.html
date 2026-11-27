@@ -1,0 +1,30 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-5">
+            <div class="card border-0 border-top border-primary border-5 shadow">
+                <div class="card-body p-4 p-md-5">
+                    {% if confirmed %}
+                        <h1 class="h2 mb-3">You're an admin</h1>
+                        <p class="text-secondary">{{ target.username }} now has the admin role.</p>
+                        <a href="{% url 'landing_page:index' %}" class="btn btn-primary text-uppercase">Go to the site</a>
+                    {% elif valid %}
+                        <h1 class="h2 mb-3">Confirm admin role</h1>
+                        <p class="text-secondary">Become an admin as <strong>{{ target.username }}</strong>? Only confirm if you asked for this or expected it.</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary w-100 text-uppercase">Confirm</button>
+                        </form>
+                    {% else %}
+                        <h1 class="h2 mb-3">Link not valid</h1>
+                        <p class="text-secondary mb-0">This confirmation link has expired, was already used, or isn't correct. Ask an admin to send a new one.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}
