@@ -1,3 +1,5 @@
+{% load bootstrap_extras %}
+{% officers as club_officers %}
 <footer class="bg-dark text-white mt-5 pt-5">
     <div class="container">
         <div class="row align-items-center g-4 pb-4">
@@ -16,12 +18,15 @@
             <span>Green Level High School's Coding club</span>
         </div>
     </div>
-    <div class="bg-body-secondary text-dark border-top py-3">
-        <div class="container d-flex flex-wrap justify-content-center align-items-baseline column-gap-3 row-gap-1 small text-center">
-            <span class="fw-bold text-uppercase">Contact</span>
-            <span><strong>Alex Rivera</strong>, President &middot; <a href="mailto:alex.rivera@example.com" class="link-dark">alex.rivera@example.com</a></span>
-            <span class="text-secondary">|</span>
-            <span><strong>Jordan Lee</strong>, Vice President &middot; <a href="mailto:jordan.lee@example.com" class="link-dark">jordan.lee@example.com</a></span>
+    {% if club_officers %}
+        <div class="bg-body-secondary text-dark border-top py-3">
+            <div class="container d-flex flex-wrap justify-content-center align-items-baseline column-gap-3 row-gap-1 small text-center">
+                <span class="fw-bold text-uppercase">Contact</span>
+                {% for officer in club_officers %}
+                    {% if not forloop.first %}<span class="text-secondary">|</span>{% endif %}
+                    <span><strong>{{ officer.name }}</strong>, {{ officer.role }} &middot; <a href="mailto:{{ officer.email }}" class="link-dark">{{ officer.email }}</a></span>
+                {% endfor %}
+            </div>
         </div>
-    </div>
+    {% endif %}
 </footer>

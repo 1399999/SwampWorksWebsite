@@ -1,6 +1,6 @@
 from django import template
 
-from landing_page.models import Project
+from landing_page.models import Contact, Project
 
 register = template.Library()
 
@@ -17,3 +17,14 @@ def add_class(field, css_class):
 def nav_projects():
     """Approved projects for the navbar menu: current projects first, then previous ones."""
     return Project.objects.filter(is_approved=True).order_by('-status', 'title')
+
+
+@register.simple_tag
+def officers():
+    """The President and Vice President from the Contact data, for the footer."""
+    found = []
+    for role in ('President', 'Vice President'):
+        person = Contact.objects.filter(role__iexact=role).order_by('pk').first()
+        if person:
+            found.append(person)
+    return found
