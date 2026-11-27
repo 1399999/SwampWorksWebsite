@@ -82,6 +82,7 @@
                 <h3 class="h5 mt-4">Team</h3>
                 <p class="text-secondary small">Add everyone who worked on the project and their role. Leave unused rows blank.</p>
                 {{ member_formset.management_form }}
+                {% for error in member_formset.non_form_errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
                 <div id="team-members">
                     {% for member_form in member_formset %}
                         <div class="team-row row g-2 mb-2 {% if forloop.first %}is-default{% else %}is-faded{% endif %}" data-row>
@@ -91,7 +92,7 @@
                                 {% for error in member_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                             </div>
                             <div class="col-sm-6">
-                                {{ member_form.role|add_class:"form-control" }}
+                                {{ member_form.role|add_class:"form-select" }}
                                 {% for error in member_form.role.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                             </div>
                         </div>
@@ -102,7 +103,7 @@
                     <div class="team-row row g-2 mb-2 is-faded" data-row>
                         {% for hidden in member_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
                         <div class="col-sm-6">{{ member_formset.empty_form.name|add_class:"form-control" }}</div>
-                        <div class="col-sm-6">{{ member_formset.empty_form.role|add_class:"form-control" }}</div>
+                        <div class="col-sm-6">{{ member_formset.empty_form.role|add_class:"form-select" }}</div>
                     </div>
                 </template>
 
@@ -119,10 +120,22 @@
                         function rows() { return Array.prototype.slice.call(list.querySelectorAll('[data-row]')); }
 
                         function hasContent(row) {
-                            var filled = Array.prototype.some.call(row.querySelectorAll('input[type="text"]'), function (input) {
-                                return input.value.trim() !== '';
+                            var name = row.querySelector('input[type="text"]');
+                            var role = row.querySelector('select');
+                            return (name && name.value.trim() !== '')
+                                || (role && role.value !== 'Member')
+                                || row.querySelector('.text-danger') !== null;
+                        }
+
+                        // only one row may be the leader: once chosen, "Leader" is disabled in every other row
+                        function syncLeader() {
+                            var selects = Array.prototype.slice.call(list.querySelectorAll('select'));
+                            var leader = selects.filter(function (select) { return select.value === 'Leader'; })[0];
+                            selects.forEach(function (select) {
+                                Array.prototype.forEach.call(select.options, function (option) {
+                                    if (option.value === 'Leader') option.disabled = !!leader && select !== leader;
+                                });
                             });
-                            return filled || row.querySelector('.text-danger') !== null;
                         }
 
                         function addFadedRow() {
@@ -150,6 +163,7 @@
                             row.classList.remove('is-faded');
                             row.classList.add('is-active');
                             refresh();
+                            syncLeader();
                         }
 
                         // rows that already hold data (e.g. after a validation error) start out solid
@@ -160,12 +174,14 @@
                             }
                         });
                         refresh();
+                        syncLeader();
 
                         // clicking or typing solidifies a row and adds a new faded one; hovering only previews it
                         list.addEventListener('pointerdown', function (event) {
-                            var input = event.target.closest('input');
-                            if (input) activate(input.closest('[data-row]'));
+                            var field = event.target.closest('input, select');
+                            if (field) activate(field.closest('[data-row]'));
                         });
+                        list.addEventListener('change', syncLeader);
                         list.addEventListener('input', function (event) {
                             var row = event.target.closest('[data-row]');
                             if (row) activate(row);
