@@ -1,8 +1,27 @@
-<footer class="site-footer">
-    <div class="site-footer-inner">
-        <span class="site-footer-title">Contact</span>
-        <span><strong>Alex Rivera</strong>, President &middot; <a href="mailto:alex.rivera@example.com">alex.rivera@example.com</a></span>
-        <span class="site-footer-sep">|</span>
-        <span><strong>Jordan Lee</strong>, Vice President &middot; <a href="mailto:jordan.lee@example.com">jordan.lee@example.com</a></span>
+<footer class="bg-dark text-white mt-5 pt-5">
+    <div class="container">
+        <div class="row align-items-center g-4 pb-4">
+            <div class="col-md-3 fw-bolder fs-5">SwampWorks</div>
+            <div class="col-md-5 text-white-50 small">Showcase projects, share ideas, and connect with the community.</div>
+            <div class="col-md-4">
+                <ul class="nav justify-content-md-end">
+                    <li class="nav-item"><a class="nav-link text-white px-2" href="{% url 'landing_page:projects' %}">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link text-white px-2" href="{% url 'landing_page:ideas' %}">Project Ideas</a></li>
+                    <li class="nav-item"><a class="nav-link text-white px-2" href="{% url 'landing_page:contact' %}">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="d-flex flex-column flex-md-row justify-content-between border-top border-secondary-subtle py-3 text-white-50 text-uppercase small">
+            <span>SwampWorks Coding Club</span>
+            <span>Green Level High School's Coding club</span>
+        </div>
+    </div>
+    <div class="bg-body-secondary text-dark border-top py-3">
+        <div class="container d-flex flex-wrap justify-content-center align-items-baseline column-gap-3 row-gap-1 small text-center">
+            <span class="fw-bold text-uppercase">Contact</span>
+            <span><strong>Alex Rivera</strong>, President &middot; <a href="mailto:alex.rivera@example.com" class="link-dark">alex.rivera@example.com</a></span>
+            <span class="text-secondary">|</span>
+            <span><strong>Jordan Lee</strong>, Vice President &middot; <a href="mailto:jordan.lee@example.com" class="link-dark">jordan.lee@example.com</a></span>
+        </div>
     </div>
 </footer>
