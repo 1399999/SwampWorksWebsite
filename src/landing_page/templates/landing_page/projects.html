@@ -1,5 +1,16 @@
 {% extends 'landing_page/base.html' %}
 {% load static bootstrap_extras %}
+
+{% block extra_head %}
+<style>
+    /* Team rows: faded rows sit below the real ones and fade out toward the bottom */
+    .team-row { transition: opacity 0.25s ease; }
+    .team-row.is-faded { opacity: var(--fade, 0.4); }
+    .team-row.is-faded:hover,
+    .team-row.is-faded:focus-within { opacity: 1; }
+</style>
+{% endblock extra_head %}
+
 {% block content %}
 
 <header class="bg-light border-bottom py-5">
@@ -71,19 +82,96 @@
                 <h3 class="h5 mt-4">Team</h3>
                 <p class="text-secondary small">Add everyone who worked on the project and their role. Leave unused rows blank.</p>
                 {{ member_formset.management_form }}
-                {% for member_form in member_formset %}
-                    {% for hidden in member_form.hidden_fields %}{{ hidden }}{% endfor %}
-                    <div class="row g-2 mb-2">
-                        <div class="col-sm-6">
-                            {{ member_form.name|add_class:"form-control" }}
-                            {% for error in member_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                <div id="team-members">
+                    {% for member_form in member_formset %}
+                        <div class="team-row row g-2 mb-2 {% if forloop.first %}is-default{% else %}is-faded{% endif %}" data-row>
+                            {% for hidden in member_form.hidden_fields %}{{ hidden }}{% endfor %}
+                            <div class="col-sm-6">
+                                {{ member_form.name|add_class:"form-control" }}
+                                {% for error in member_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-sm-6">
+                                {{ member_form.role|add_class:"form-control" }}
+                                {% for error in member_form.role.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
                         </div>
-                        <div class="col-sm-6">
-                            {{ member_form.role|add_class:"form-control" }}
-                            {% for error in member_form.role.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-                        </div>
+                    {% endfor %}
+                </div>
+
+                <template id="member-row-template">
+                    <div class="team-row row g-2 mb-2 is-faded" data-row>
+                        {% for hidden in member_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        <div class="col-sm-6">{{ member_formset.empty_form.name|add_class:"form-control" }}</div>
+                        <div class="col-sm-6">{{ member_formset.empty_form.role|add_class:"form-control" }}</div>
                     </div>
-                {% endfor %}
+                </template>
+
+                <script>
+                    (function () {
+                        var list = document.getElementById('team-members');
+                        var total = document.getElementById('id_members-TOTAL_FORMS');
+                        var template = document.getElementById('member-row-template');
+                        if (!list || !total || !template) return;
+
+                        // how see-through each faded row is, from the top one down
+                        var FADES = [0.6, 0.35, 0.15];
+
+                        function rows() { return Array.prototype.slice.call(list.querySelectorAll('[data-row]')); }
+
+                        function hasContent(row) {
+                            var filled = Array.prototype.some.call(row.querySelectorAll('input[type="text"]'), function (input) {
+                                return input.value.trim() !== '';
+                            });
+                            return filled || row.querySelector('.text-danger') !== null;
+                        }
+
+                        function addFadedRow() {
+                            var index = parseInt(total.value, 10);
+                            var holder = document.createElement('div');
+                            holder.innerHTML = template.innerHTML.replace(/__prefix__/g, index).trim();
+                            list.appendChild(holder.firstElementChild);
+                            total.value = index + 1;
+                        }
+
+                        function refresh() {
+                            while (list.querySelectorAll('.is-faded').length < FADES.length) addFadedRow();
+                            list.querySelectorAll('.is-faded').forEach(function (row, i) {
+                                if (i < FADES.length) {
+                                    row.classList.remove('d-none');
+                                    row.style.setProperty('--fade', FADES[i]);
+                                } else {
+                                    row.classList.add('d-none');
+                                }
+                            });
+                        }
+
+                        function activate(row) {
+                            if (!row.classList.contains('is-faded')) return;
+                            row.classList.remove('is-faded');
+                            row.classList.add('is-active');
+                            refresh();
+                        }
+
+                        // rows that already hold data (e.g. after a validation error) start out solid
+                        rows().forEach(function (row, i) {
+                            if (i > 0 && hasContent(row)) {
+                                row.classList.remove('is-faded');
+                                row.classList.add('is-active');
+                            }
+                        });
+                        refresh();
+
+                        // clicking or typing solidifies a row and adds a new faded one; hovering only previews it
+                        list.addEventListener('pointerdown', function (event) {
+                            var input = event.target.closest('input');
+                            if (input) activate(input.closest('[data-row]'));
+                        });
+                        list.addEventListener('input', function (event) {
+                            var row = event.target.closest('[data-row]');
+                            if (row) activate(row);
+                        });
+                    })();
+                </script>
 
                 <button type="submit" class="btn btn-primary text-uppercase mt-3">Submit Project</button>
             </form>
