@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.forms import BaseInlineFormSet, inlineformset_factory
 
 from .models import Project, ProjectImage, ProjectMember, Idea, ClubMeeting, Contact
@@ -75,24 +76,43 @@ _member_widgets = {
 MEMBER_ROLE_CHOICES = [('Member', 'Member'), ('Leader', 'Leader')]
 
 
-class NewMemberForm(forms.ModelForm):
-    """A team member on a new project: the role is a choice between Member and Leader."""
+def user_name_choices():
+    """Everyone with an account, by first and last name, for the team dropdown."""
+    names = []
+    for user in get_user_model().objects.order_by('first_name', 'last_name', 'username'):
+        full_name = user.get_full_name() or user.username
+        if full_name not in names:
+            names.append(full_name)
+    return [('', 'Select a person')] + [(name, name) for name in names]
 
+
+class NewMemberForm(forms.ModelForm):
+    """A team member on a new project: pick a person from the user list and a role (Member or Leader)."""
+
+    name = forms.ChoiceField(choices=[('', 'Select a person')])
     role = forms.ChoiceField(choices=MEMBER_ROLE_CHOICES, initial='Member')
 
     class Meta:
         model = ProjectMember
         fields = ('name', 'role')
-        widgets = {'name': forms.TextInput(attrs={'placeholder': 'Name'})}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, name_choices=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['name'].choices = name_choices or user_name_choices()
         # a blank extra row counts as untouched only if its role starts out as Member
         if not self.initial.get('role'):
             self.initial['role'] = 'Member'
 
 
 class BaseNewMemberFormSet(BaseInlineFormSet):
+    def get_form_kwargs(self, index):
+        # look the users up once per page instead of once per row
+        kwargs = super().get_form_kwargs(index)
+        if not hasattr(self, '_name_choices'):
+            self._name_choices = user_name_choices()
+        kwargs['name_choices'] = self._name_choices
+        return kwargs
+
     def clean(self):
         super().clean()
         leaders = 0

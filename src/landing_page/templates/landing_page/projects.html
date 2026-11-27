@@ -88,7 +88,7 @@
                         <div class="team-row row g-2 mb-2 {% if forloop.first %}is-default{% else %}is-faded{% endif %}" data-row>
                             {% for hidden in member_form.hidden_fields %}{{ hidden }}{% endfor %}
                             <div class="col-sm-6">
-                                {{ member_form.name|add_class:"form-control" }}
+                                {{ member_form.name|add_class:"form-select" }}
                                 {% for error in member_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                             </div>
                             <div class="col-sm-6">
@@ -102,7 +102,7 @@
                 <template id="member-row-template">
                     <div class="team-row row g-2 mb-2 is-faded" data-row>
                         {% for hidden in member_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
-                        <div class="col-sm-6">{{ member_formset.empty_form.name|add_class:"form-control" }}</div>
+                        <div class="col-sm-6">{{ member_formset.empty_form.name|add_class:"form-select" }}</div>
                         <div class="col-sm-6">{{ member_formset.empty_form.role|add_class:"form-select" }}</div>
                     </div>
                 </template>
@@ -120,16 +120,16 @@
                         function rows() { return Array.prototype.slice.call(list.querySelectorAll('[data-row]')); }
 
                         function hasContent(row) {
-                            var name = row.querySelector('input[type="text"]');
-                            var role = row.querySelector('select');
-                            return (name && name.value.trim() !== '')
+                            var name = row.querySelector('select[name$="-name"]');
+                            var role = row.querySelector('select[name$="-role"]');
+                            return (name && name.value !== '')
                                 || (role && role.value !== 'Member')
                                 || row.querySelector('.text-danger') !== null;
                         }
 
                         // only one row may be the leader: once chosen, "Leader" is disabled in every other row
                         function syncLeader() {
-                            var selects = Array.prototype.slice.call(list.querySelectorAll('select'));
+                            var selects = Array.prototype.slice.call(list.querySelectorAll('select[name$="-role"]'));
                             var leader = selects.filter(function (select) { return select.value === 'Leader'; })[0];
                             selects.forEach(function (select) {
                                 Array.prototype.forEach.call(select.options, function (option) {
