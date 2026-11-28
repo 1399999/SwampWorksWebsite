@@ -28,10 +28,10 @@
                                     {% if account.role == 'user' %}
                                         <button type="button" class="btn btn-sm rounded-pill btn-primary" aria-pressed="true">User</button>
                                     {% else %}
-                                        <form action="{% url 'dashboard:make_regular_user' account.pk %}" method="post" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm rounded-pill btn-outline-secondary" aria-pressed="false">User</button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm rounded-pill btn-outline-secondary" aria-pressed="false"
+                                                data-bs-toggle="modal" data-bs-target="#userConfirmModal"
+                                                data-action="{% url 'dashboard:make_regular_user' account.pk %}"
+                                                data-username="{{ account.username }}">User</button>
                                     {% endif %}
                                     {% if account.role == 'admin' %}
                                         <button type="button" class="btn btn-sm rounded-pill btn-primary" aria-pressed="true">Admin</button>
@@ -50,10 +50,10 @@
                         <td>{{ account.date_joined|date:"M d, Y" }}</td>
                         <td>
                             {% if account.pk != user.pk %}
-                                <form action="{% url 'dashboard:admin_delete_user' account.pk %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal" data-bs-target="#deleteConfirmModal"
+                                        data-action="{% url 'dashboard:admin_delete_user' account.pk %}"
+                                        data-username="{{ account.username }}">Delete</button>
                             {% else %}
                                 <span class="text-secondary small">(you)</span>
                             {% endif %}
@@ -112,6 +112,25 @@
     </div>
 </div>
 
+<div class="modal fade" id="userConfirmModal" tabindex="-1" aria-labelledby="userConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" class="modal-content" id="userConfirmForm">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="userConfirmLabel">Remove admin role?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">You are about to make <strong id="userConfirmUsername"></strong> a regular user. They will no longer be an admin and will lose access to the admin area.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, remove admin</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     (function () {
         var modal = document.getElementById('adminConfirmModal');
@@ -124,6 +143,49 @@
             document.getElementById('adminConfirmForm').action = chip.getAttribute('data-action');
             document.getElementById('adminConfirmNoEmail').classList.toggle('d-none', !!email);
             document.getElementById('adminConfirmYes').disabled = !email;
+        });
+    })();
+</script>
+
+<script>
+    (function () {
+        var modal = document.getElementById('userConfirmModal');
+        if (!modal) return;
+        modal.addEventListener('show.bs.modal', function (event) {
+            var chip = event.relatedTarget;
+            document.getElementById('userConfirmUsername').textContent = chip.getAttribute('data-username');
+            document.getElementById('userConfirmForm').action = chip.getAttribute('data-action');
+        });
+    })();
+</script>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" class="modal-content" id="deleteConfirmForm">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="deleteConfirmLabel">Delete this user?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">You are about to permanently delete <strong id="deleteConfirmUsername"></strong>. This can't be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, delete user</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('deleteConfirmModal');
+        if (!modal) return;
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            document.getElementById('deleteConfirmUsername').textContent = button.getAttribute('data-username');
+            document.getElementById('deleteConfirmForm').action = button.getAttribute('data-action');
         });
     })();
 </script>

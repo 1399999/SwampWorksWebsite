@@ -37,7 +37,7 @@
                 {% if user.is_authenticated %}
                     <span class="navbar-text fw-semibold text-dark">{{ user.get_full_name|default:user.username }}</span>
                     <a href="{% url 'accounts:admin_login' %}" class="nav-link">Admin</a>
-                    <a href="{% url 'accounts:logout' %}" class="nav-link">Log Out</a>
+                    <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#logoutModal">Log Out</a>
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="nav-link">Log In</a>
                 {% endif %}
@@ -48,6 +48,26 @@
         </div>
     </div>
 </nav>
+
+{% if user.is_authenticated %}
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="logoutModalLabel">Log out?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to log out?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <a href="{% url 'accounts:logout' %}" class="btn btn-primary">Yes, log out</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 <script>
     // this creates the hover over Projects navbar
     document.addEventListener('DOMContentLoaded', function () {
