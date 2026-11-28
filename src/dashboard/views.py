@@ -78,8 +78,8 @@ def request_admin_role(request, user_id):
             messages.error(request, "You can't change your own role.")
         elif target.role == 'admin':
             messages.info(request, f'{target.username} is already an admin.')
-        elif not target.email:
-            messages.error(request, f'{target.username} has no email address, so no confirmation email can be sent.')
+        elif not request.user.email:
+            messages.error(request, 'Your account has no email address, so the confirmation email cannot be sent to you.')
         else:
             #random secret that goes in the emailed link; only its hash is saved
             token = secrets.token_urlsafe(32)
@@ -87,16 +87,16 @@ def request_admin_role(request, user_id):
             hours = int(ADMIN_TOKEN_LIFETIME.total_seconds() // 3600)
             try:
                 send_mail(
-                    subject='Confirm your SwampWorks admin role',
+                    subject=f'Confirm making {target.username} an admin',
                     message=(
-                        f"Hi {target.username},\n\n"
-                        f"{request.user.username} asked to make you an admin on SwampWorks.\n\n"
-                        f"To accept, open this link and confirm:\n{link}\n\n"
+                        f"Hi {request.user.username},\n\n"
+                        f"You asked to make {target.username} an admin on SwampWorks.\n\n"
+                        f"To confirm, open this link:\n{link}\n\n"
                         f"The link works once and expires in {hours} hours. "
-                        f"If you weren't expecting this, you can ignore this email and nothing will change."
+                        f"If you didn't make this request, ignore this email and nothing will change."
                     ),
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[target.email],
+                    recipient_list=[request.user.email],
                     fail_silently=False,
                 )
             except Exception:
@@ -107,7 +107,7 @@ def request_admin_role(request, user_id):
                 target.save(update_fields=['admin_token_hash', 'admin_token_created'])
                 messages.success(
                     request,
-                    f'Confirmation email sent to {target.email}. {target.username} becomes an admin once they open the link and confirm.',
+                    f'Confirmation email sent to {request.user.email}. {target.username} becomes an admin once you open the link and confirm.',
                 )
 
     return redirect('dashboard:admin')
