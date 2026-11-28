@@ -131,6 +131,107 @@
                         // how see-through each faded row is, from the top one down
                         var FADES = [0.6, 0.35, 0.15];
 
+                        // each person dropdown becomes a searchable list; the hidden <select> underneath is what gets submitted
+                        function enhance(row) {
+                            var select = row.querySelector('select[name$="-person"]');
+                            if (!select || select.dataset.enhanced) return;
+                            select.dataset.enhanced = '1';
+
+                            var picker = document.createElement('div');
+                            picker.className = 'dropdown';
+
+                            var toggle = document.createElement('button');
+                            toggle.type = 'button';
+                            toggle.className = 'form-select text-start';
+                            toggle.setAttribute('data-bs-toggle', 'dropdown');
+                            toggle.setAttribute('data-bs-auto-close', 'outside');
+                            toggle.setAttribute('aria-expanded', 'false');
+                            toggle.textContent = select.options[select.selectedIndex].text;
+
+                            var menu = document.createElement('div');
+                            menu.className = 'dropdown-menu w-100 p-2';
+
+                            var search = document.createElement('input');
+                            search.type = 'text';
+                            search.className = 'form-control form-control-sm mb-2';
+                            search.placeholder = 'Search people...';
+                            search.autocomplete = 'off';
+
+                            var results = document.createElement('div');
+                            results.style.maxHeight = '14rem';
+                            results.style.overflowY = 'auto';
+
+                            var none = document.createElement('div');
+                            none.className = 'dropdown-item-text text-secondary small d-none';
+                            none.textContent = 'No matching people';
+
+                            function visibleItems() {
+                                return Array.prototype.filter.call(results.querySelectorAll('.dropdown-item'), function (item) {
+                                    return !item.classList.contains('d-none');
+                                });
+                            }
+
+                            function filter() {
+                                var query = search.value.trim().toLowerCase();
+                                var shown = 0;
+                                Array.prototype.forEach.call(results.querySelectorAll('.dropdown-item'), function (item) {
+                                    var isBlank = item.dataset.value === '';
+                                    var show = query === '' || (!isBlank && item.textContent.toLowerCase().indexOf(query) !== -1);
+                                    item.classList.toggle('d-none', !show);
+                                    if (show && !isBlank) shown++;
+                                });
+                                none.classList.toggle('d-none', query === '' || shown > 0);
+                            }
+
+                            function choose(item) {
+                                select.value = item.dataset.value;
+                                toggle.textContent = item.textContent;
+                                Array.prototype.forEach.call(results.querySelectorAll('.dropdown-item'), function (other) {
+                                    other.classList.toggle('active', other === item);
+                                });
+                                if (window.bootstrap) bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+                            }
+
+                            Array.prototype.forEach.call(select.options, function (option) {
+                                var item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'dropdown-item' + (option.selected && option.value ? ' active' : '');
+                                item.textContent = option.text;
+                                item.dataset.value = option.value;
+                                item.addEventListener('click', function () { choose(item); });
+                                results.appendChild(item);
+                            });
+
+                            search.addEventListener('input', filter);
+                            search.addEventListener('keydown', function (event) {
+                                if (event.key === 'Enter') {
+                                    // never submit the form from here; pick the first match instead
+                                    event.preventDefault();
+                                    var first = visibleItems().filter(function (item) { return item.dataset.value !== ''; })[0];
+                                    if (first) choose(first);
+                                } else if (event.key === 'ArrowDown') {
+                                    event.preventDefault();
+                                    var next = visibleItems()[0];
+                                    if (next) next.focus();
+                                }
+                            });
+                            picker.addEventListener('shown.bs.dropdown', function () {
+                                search.value = '';
+                                filter();
+                                search.focus();
+                            });
+
+                            menu.appendChild(search);
+                            menu.appendChild(results);
+                            menu.appendChild(none);
+                            picker.appendChild(toggle);
+                            picker.appendChild(menu);
+
+                            select.classList.add('d-none');
+                            select.parentNode.insertBefore(picker, select);
+                        }
+                        rows().forEach(enhance);
+
                         function rows() { return Array.prototype.slice.call(list.querySelectorAll('[data-row]')); }
 
                         function hasContent(row) {
@@ -156,7 +257,9 @@
                             var index = parseInt(total.value, 10);
                             var holder = document.createElement('div');
                             holder.innerHTML = template.innerHTML.replace(/__prefix__/g, index).trim();
-                            list.appendChild(holder.firstElementChild);
+                            var newRow = holder.firstElementChild;
+                            list.appendChild(newRow);
+                            enhance(newRow);
                             total.value = index + 1;
                         }
 
@@ -192,7 +295,7 @@
 
                         // clicking or typing solidifies a row and adds a new faded one; hovering only previews it
                         list.addEventListener('pointerdown', function (event) {
-                            var field = event.target.closest('input, select');
+                            var field = event.target.closest('input, select, button');
                             if (field) activate(field.closest('[data-row]'));
                         });
                         list.addEventListener('change', syncLeader);
@@ -215,4 +318,37 @@
         </div>
     </section>
 </main>
+
+{% if user.is_authenticated and request.session.is_admin %}
+<div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-labelledby="deleteProjectLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" class="modal-content" id="deleteProjectForm">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="deleteProjectLabel">Delete this project?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">You are about to permanently delete <strong id="deleteProjectName"></strong>. This can't be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, delete project</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('deleteProjectModal');
+        if (!modal) return;
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            document.getElementById('deleteProjectName').textContent = button.getAttribute('data-name');
+            document.getElementById('deleteProjectForm').action = button.getAttribute('data-action');
+        });
+    })();
+</script>
+{% endif %}
 {% endblock content %}

@@ -38,10 +38,10 @@
             </form>
             <div class="d-flex gap-2 mt-2">
                 <a href="{% url 'landing_page:edit_project' project.pk %}" class="btn btn-sm btn-outline-dark">Edit</a>
-                <form action="{% url 'landing_page:delete_project' project.pk %}" method="post" onsubmit="return confirm('Delete this project?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-danger">Delete project</button>
-                </form>
+                <button type="button" class="btn btn-sm btn-danger"
+                        data-bs-toggle="modal" data-bs-target="#deleteProjectModal"
+                        data-action="{% url 'landing_page:delete_project' project.pk %}"
+                        data-name="{{ project.title }}">Delete project</button>
             </div>
             </div>
         {% endif %}

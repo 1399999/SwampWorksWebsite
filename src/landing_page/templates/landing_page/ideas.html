@@ -48,10 +48,10 @@
                     <div class="card-body">
                         <p class="card-text">{{ idea.description|linebreaksbr }}</p>
                         {% if user.is_authenticated and request.session.is_admin %}
-                            <form action="{% url 'landing_page:delete_idea' idea.pk %}" method="post" onsubmit="return confirm('Delete this idea?');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-danger">Delete idea</button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal" data-bs-target="#deleteIdeaModal"
+                                    data-action="{% url 'landing_page:delete_idea' idea.pk %}"
+                                    data-name="{{ idea.description|truncatechars:80 }}">Delete idea</button>
                         {% endif %}
                     </div>
                 </article>
@@ -61,4 +61,37 @@
         <p class="text-secondary">No ideas yet. Be the first to post one.</p>
     {% endif %}
 </main>
+
+{% if user.is_authenticated and request.session.is_admin %}
+<div class="modal fade" id="deleteIdeaModal" tabindex="-1" aria-labelledby="deleteIdeaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" class="modal-content" id="deleteIdeaForm">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="deleteIdeaLabel">Delete this idea?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">You are about to permanently delete this idea: <strong id="deleteIdeaName"></strong>. This can't be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, delete idea</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('deleteIdeaModal');
+        if (!modal) return;
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            document.getElementById('deleteIdeaName').textContent = button.getAttribute('data-name');
+            document.getElementById('deleteIdeaForm').action = button.getAttribute('data-action');
+        });
+    })();
+</script>
+{% endif %}
 {% endblock content %}

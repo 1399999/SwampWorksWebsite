@@ -78,9 +78,14 @@ MEMBER_ROLE_CHOICES = [('Member', 'Member'), ('Leader', 'Leader')]
 
 def user_name_choices():
     """Everyone with an account, by first and last name, for the team dropdown."""
+    users = list(get_user_model().objects.order_by('first_name', 'last_name', 'username'))
+    labels = [user.get_full_name() or user.username for user in users]
     choices = [('', 'Select a person')]
-    for user in get_user_model().objects.order_by('first_name', 'last_name', 'username'):
-        choices.append((str(user.pk), user.get_full_name() or user.username))
+    for user, label in zip(users, labels):
+        if labels.count(label) > 1:
+            # same name as someone else: add the username so they can be told apart
+            label = f'{label} ({user.username})'
+        choices.append((str(user.pk), label))
     return choices
 
 
