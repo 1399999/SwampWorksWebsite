@@ -48,7 +48,7 @@
 
             <div class="d-flex flex-wrap gap-2">
                 <a href="{% url 'landing_page:projects' %}" class="btn btn-outline-dark text-uppercase">&laquo; All Projects</a>
-                {% if user.is_authenticated and request.session.is_admin %}
+                {% if can_edit %}
                     <a href="{% url 'landing_page:edit_project' project.pk %}" class="btn btn-primary text-uppercase">Edit</a>
                 {% endif %}
             </div>

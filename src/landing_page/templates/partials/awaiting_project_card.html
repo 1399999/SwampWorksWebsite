@@ -1,0 +1,34 @@
+<article class="card h-100 border-top border-warning border-3 rounded-1">
+    {% include 'partials/project_carousel.html' %}
+    <div class="card-body">
+        <span class="badge text-bg-warning text-uppercase mb-2">Awaiting approval</span>
+        <h3 class="h5"><a href="{% url 'landing_page:project_detail' project.pk %}" class="text-decoration-none">{{ project.title }}</a></h3>
+        <p class="card-text">{{ project.description|linebreaksbr }}</p>
+        {% if project.technology_list %}
+            <div class="d-flex flex-wrap gap-2 mb-2">
+                {% for tech in project.technology_list %}
+                    <span class="badge rounded-pill text-bg-light border fw-medium">{{ tech }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% for member in project.members.all %}
+            <div class="d-flex justify-content-between border-top py-1 small">
+                <span class="fw-semibold">{{ member.name }}</span>
+                <span class="text-secondary">{{ member.role }}</span>
+            </div>
+        {% endfor %}
+
+        <form action="{% url 'landing_page:update_project_status' project.pk %}" method="post" class="input-group input-group-sm mt-3">
+            {% csrf_token %}
+            <select name="status" class="form-select">
+                {% for value, label in project.STATUS_CHOICES %}
+                    <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-dark">Update</button>
+        </form>
+        <div class="mt-2">
+            <a href="{% url 'landing_page:edit_project' project.pk %}" class="btn btn-sm btn-outline-dark">Edit</a>
+        </div>
+    </div>
+</article>

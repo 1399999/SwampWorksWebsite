@@ -51,6 +51,11 @@ class ProjectMember(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='members')
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
+    # set when the person was picked from the user dropdown; this is what grants access
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='project_memberships',
+    )
 
     class Meta:
         ordering = ['id']

@@ -78,30 +78,41 @@ MEMBER_ROLE_CHOICES = [('Member', 'Member'), ('Leader', 'Leader')]
 
 def user_name_choices():
     """Everyone with an account, by first and last name, for the team dropdown."""
-    names = []
+    choices = [('', 'Select a person')]
     for user in get_user_model().objects.order_by('first_name', 'last_name', 'username'):
-        full_name = user.get_full_name() or user.username
-        if full_name not in names:
-            names.append(full_name)
-    return [('', 'Select a person')] + [(name, name) for name in names]
+        choices.append((str(user.pk), user.get_full_name() or user.username))
+    return choices
 
 
 class NewMemberForm(forms.ModelForm):
     """A team member on a new project: pick a person from the user list and a role (Member or Leader)."""
 
-    name = forms.ChoiceField(choices=[('', 'Select a person')])
+    person = forms.ChoiceField(choices=[('', 'Select a person')])
     role = forms.ChoiceField(choices=MEMBER_ROLE_CHOICES, initial='Member')
 
     class Meta:
         model = ProjectMember
-        fields = ('name', 'role')
+        fields = ('role',)
 
     def __init__(self, *args, name_choices=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name'].choices = name_choices or user_name_choices()
+        self.fields['person'].choices = name_choices or user_name_choices()
         # a blank extra row counts as untouched only if its role starts out as Member
         if not self.initial.get('role'):
             self.initial['role'] = 'Member'
+
+    def clean_person(self):
+        value = self.cleaned_data.get('person')
+        if not value:
+            return None
+        return get_user_model().objects.get(pk=value)
+
+    def save(self, commit=True):
+        person = self.cleaned_data.get('person')
+        if person:
+            self.instance.user = person
+            self.instance.name = person.get_full_name() or person.username
+        return super().save(commit=commit)
 
 
 class BaseNewMemberFormSet(BaseInlineFormSet):
@@ -116,12 +127,18 @@ class BaseNewMemberFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
         leaders = 0
+        people = []
         for form in self.forms:
             data = getattr(form, 'cleaned_data', None)
-            if data and data.get('name') and data.get('role') == 'Leader':
+            if not data or not data.get('person'):
+                continue
+            people.append(data['person'].pk)
+            if data.get('role') == 'Leader':
                 leaders += 1
         if leaders > 1:
             raise forms.ValidationError('Only one team member can be the leader.')
+        if len(people) != len(set(people)):
+            raise forms.ValidationError('Each person can only be added to a project once.')
 
 
 ProjectMemberFormSet = inlineformset_factory(

@@ -22,6 +22,20 @@
 </header>
 
 <main class="container py-5">
+    {% if awaiting_projects %}
+        <section class="mb-5">
+            <h2 class="display-6 mb-4">Awaiting Approval</h2>
+            <p class="text-secondary">Only you and your teammates can see these. You can edit them and change their status until an admin approves them.</p>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for project in awaiting_projects %}
+                    <div class="col">
+                        {% include 'partials/awaiting_project_card.html' %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
     <section class="mb-5">
         <h2 class="display-6 mb-4">Current Projects</h2>
         {% if ongoing_projects %}
@@ -88,8 +102,8 @@
                         <div class="team-row row g-2 mb-2 {% if forloop.first %}is-default{% else %}is-faded{% endif %}" data-row>
                             {% for hidden in member_form.hidden_fields %}{{ hidden }}{% endfor %}
                             <div class="col-sm-6">
-                                {{ member_form.name|add_class:"form-select" }}
-                                {% for error in member_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                {{ member_form.person|add_class:"form-select" }}
+                                {% for error in member_form.person.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                             </div>
                             <div class="col-sm-6">
                                 {{ member_form.role|add_class:"form-select" }}
@@ -102,7 +116,7 @@
                 <template id="member-row-template">
                     <div class="team-row row g-2 mb-2 is-faded" data-row>
                         {% for hidden in member_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
-                        <div class="col-sm-6">{{ member_formset.empty_form.name|add_class:"form-select" }}</div>
+                        <div class="col-sm-6">{{ member_formset.empty_form.person|add_class:"form-select" }}</div>
                         <div class="col-sm-6">{{ member_formset.empty_form.role|add_class:"form-select" }}</div>
                     </div>
                 </template>
@@ -120,7 +134,7 @@
                         function rows() { return Array.prototype.slice.call(list.querySelectorAll('[data-row]')); }
 
                         function hasContent(row) {
-                            var name = row.querySelector('select[name$="-name"]');
+                            var name = row.querySelector('select[name$="-person"]');
                             var role = row.querySelector('select[name$="-role"]');
                             return (name && name.value !== '')
                                 || (role && role.value !== 'Member')

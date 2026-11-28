@@ -27,6 +27,19 @@ def login_required_to_post(view):
     return wrapper
 
 
+def _is_pending_member(request, project):
+    """Someone added to the project's team, while the project is still awaiting approval."""
+    return (
+        request.user.is_authenticated
+        and not project.is_approved
+        and project.members.filter(user=request.user).exists()
+    )
+
+
+def _can_manage(request, project):
+    return _is_admin(request) or _is_pending_member(request, project)
+
+
 def _is_admin(request):
     return request.user.is_authenticated and request.session.get('is_admin')
 
@@ -179,7 +192,17 @@ def projects(request):
 
     approved = Project.objects.filter(is_approved=True).prefetch_related('images', 'members')
 
+    # projects still awaiting approval are shown only to the people added to them
+    awaiting = Project.objects.none()
+    if request.user.is_authenticated:
+        awaiting = (
+            Project.objects.filter(is_approved=False, members__user=request.user)
+            .distinct()
+            .prefetch_related('images', 'members')
+        )
+
     return render(request, 'landing_page/projects.html', {
+        'awaiting_projects': awaiting,
         'ongoing_projects': approved.filter(status='ongoing'),
         'completed_projects': approved.filter(status='completed'),
         'form': form,
@@ -193,18 +216,20 @@ def project_detail(request, project_id):
         Project.objects.prefetch_related('images', 'members'),
         pk=project_id,
     )
-    #pending projects can only be viewed by admins
-    if not project.is_approved and not _is_admin(request):
+    #pending projects can only be viewed by admins and the people added to them
+    can_edit = _can_manage(request, project)
+    if not project.is_approved and not can_edit:
         raise Http404
-    return render(request, 'landing_page/project_detail.html', {'project': project})
+    return render(request, 'landing_page/project_detail.html', {'project': project, 'can_edit': can_edit})
 
 
 def edit_project(request, project_id):
-    # only admins can edit a project (pending or already approved)
-    if not _is_admin(request):
+    project = get_object_or_404(Project, pk=project_id)
+
+    # admins, or the project's own team while it is still awaiting approval
+    if not _can_manage(request, project):
         return redirect('landing_page:projects')
 
-    project = get_object_or_404(Project, pk=project_id)
     back_url = reverse('landing_page:project_detail', args=[project.pk])
 
     if request.method == 'POST':
@@ -230,11 +255,13 @@ def edit_project(request, project_id):
 
 
 def update_project_status(request, project_id):
-    if not _is_admin(request):
+    project = get_object_or_404(Project, pk=project_id)
+
+    # admins, or the project's own team while it is still awaiting approval
+    if not _can_manage(request, project):
         return redirect('landing_page:projects')
 
     if request.method == 'POST':
-        project = get_object_or_404(Project, pk=project_id)
         new_status = request.POST.get('status')
         if new_status in dict(Project.STATUS_CHOICES):
             project.status = new_status
