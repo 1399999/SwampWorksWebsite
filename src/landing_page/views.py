@@ -363,4 +363,22 @@ def delete_contact(request, contact_id):
 
     return redirect('landing_page:contact')
 
+
+def edit_contact(request, contact_id):
+    # only admins can edit a contact
+    if not _is_admin(request):
+        return redirect('landing_page:contact')
+
+    person = get_object_or_404(Contact, pk=contact_id)
+
+    if request.method == 'POST':
+        form = ContactForm(request.POST, instance=person)
+        if form.is_valid():
+            form.save()
+            return redirect('landing_page:contact')
+    else:
+        form = ContactForm(instance=person)
+
+    return render(request, 'landing_page/edit_contact.html', {'form': form, 'person': person})
+
 #Add other views here

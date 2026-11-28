@@ -10,3 +10,5 @@ class CustomUserCreationForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['first_name'].required = True
         self.fields['last_name'].required = True
+        # Django focuses the username box by default, which scrolls the page down to it
+        self.fields['username'].widget.attrs.pop('autofocus', None)

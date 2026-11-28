@@ -21,10 +21,13 @@
                     <a href="mailto:{{ person.email }}" class="link-primary fw-semibold">{{ person.email }}</a>
                 </div>
                 {% if is_admin %}
-                    <form action="{% url 'landing_page:delete_contact' person.pk %}" method="post" onsubmit="return confirm('Remove this contact?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                    </form>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'landing_page:edit_contact' person.pk %}" class="btn btn-sm btn-outline-dark">Edit</a>
+                        <form action="{% url 'landing_page:delete_contact' person.pk %}" method="post" onsubmit="return confirm('Remove this contact?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                        </form>
+                    </div>
                 {% endif %}
             </div>
         {% endfor %}

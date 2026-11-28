@@ -1,0 +1,41 @@
+{% extends 'landing_page/base.html' %}
+{% load static bootstrap_extras %}
+{% block content %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'landing_page:contact' %}">Contact</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Editing {{ person.name }}</li>
+                </ol>
+            </nav>
+
+            <h1 class="h2 mb-4">Edit contact</h1>
+
+            <form method="post" class="card bg-light">
+                <div class="card-body p-4">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">Please fix the errors below.</div>
+                    {% endif %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                            {{ field|add_class:"form-control" }}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary text-uppercase">Save Changes</button>
+                        <a href="{% url 'landing_page:contact' %}" class="btn btn-outline-dark text-uppercase">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock content %}
